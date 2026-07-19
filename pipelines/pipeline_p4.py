@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pipelines.common.isolation import (
     isolated_call, IsolationConfig, make_arbiter_call, validate_isolation
 )
-from pipelines.common.prompts import get_prompt
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
     DialogueAct, EpistemicState, ConfidenceLevel,
@@ -68,18 +68,26 @@ def run_p4_parseurs(
     n_parseurs: int = 3,
     seed: int = 42,
     max_tokens: int = 2000,
-    temperature: float = 0.6
+    temperature: float = 0.6,
+    cycle_label: str = "A",
 ) -> List[ParseurOutput]:
     """
     Étage 1 : N parseurs isolés — lisent CHACUN l'intégralité du corpus.
     (Adaptation banc d'essai : partitionnement réel impossible pour convergence measure)
+    Injection persona si Cycle B.
     """
     config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
-    prompt = get_prompt("P4_parser", corpus_text=corpus_text)
     
     parseurs = []
     for i in range(n_parseurs):
         parseur_id = f"p4_parseur_{i}"
+        
+        # Prompt avec injection persona si Cycle B
+        if cycle_label == "B":
+            prompt = get_prompt_with_persona("P4_parser", instance_id=parseur_id, corpus_text=corpus_text)
+        else:
+            prompt = get_prompt("P4_parser", corpus_text=corpus_text)
+        
         raw = isolated_call(client, config, prompt, corpus_text)
         output = parse_parseur_output(raw, parseur_id)
         parseurs.append(output)
@@ -163,7 +171,7 @@ def run_p4_nucleus(
     config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
     
     import json
-    prompt = get_prompt("P4_nucleus",
+    prompt = get_prompt("P4_noyau",
         n_cartographes=len(cartographe_outputs),
         cartographe_outputs=json.dumps(cartographe_outputs, ensure_ascii=False, indent=2)
     )
@@ -219,7 +227,9 @@ def run_p4(
     seed: int = 42,
     max_tokens: int = 2000,
     temperature: float = 0.6,
-    cycle_num: int = 0
+    cycle_num: int = 0,
+    cycle_label: str = "A",
+    **kwargs
 ) -> P4Result:
     """Pipeline P4 complet."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -228,7 +238,8 @@ def run_p4(
     parseur_outputs = run_p4_parseurs(
         client, model, corpus_text,
         n_parseurs=n_parseurs, seed=seed,
-        max_tokens=max_tokens, temperature=temperature
+        max_tokens=max_tokens, temperature=temperature,
+        cycle_label=cycle_label
     )
     
     for p in parseur_outputs:
@@ -265,7 +276,7 @@ def run_p4(
         encoding='utf-8'
     )
     
-    print(f"[P4 Cycle {cycle_num}] {len(nucleus_result['assertions'])} assertions finales, "
+    print(f"[P4 Cycle {cycle_num} ({cycle_label})] {len(nucleus_result['assertions'])} assertions finales, "
           f"{len(nucleus_result['non_convergence_zones'])} zones non-convergence")
     
     return P4Result(
@@ -285,21 +296,23 @@ def run_p4_cycle(
     n_parseurs: int = 3,
     n_cartographes: int = 2,
     seed: int = 42,
+    cycle_label: str = "A",
     **kwargs
 ) -> Dict[str, Any]:
     """Interface pour run_experiment.py."""
     corpus_text = corpus_path.read_text(encoding='utf-8')
-    output_dir = output_base / f"cycle_{cycle_num}" / "raw_outputs"
+    output_dir = output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"
     
     result = run_p4(
         client, model, corpus_text, output_dir,
         n_parseurs=n_parseurs, n_cartographes=n_cartographes,
-        seed=seed + cycle_num * 1000, cycle_num=cycle_num, **kwargs
+        seed=seed + cycle_num * 1000, cycle_num=cycle_num, cycle_label=cycle_label, **kwargs
     )
     
     return {
         "pipeline": "P4",
         "cycle": cycle_num,
+        "cycle_label": cycle_label,
         "n_parseurs": n_parseurs,
         "n_cartographes": n_cartographes,
         "assertions_final": len(result.nucleus_output),

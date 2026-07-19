@@ -194,3 +194,33 @@ nix-shell --pure --run "cd /path/to/banc-essai && python -m pipelines.pipeline_p
 ---
 
 *Dernière MAJ : 2026-07-19 — Session Nemotron setup initial*
+
+---
+
+## 9. Mock client — Collision "Cartographe" (persona Cycle B vs détection rôle)
+
+### Symptôme
+En Cycle B, le persona `instance_2` / `parseur_2` reçoit la posture **"Cartographe des Fils Ouverts"**. Le texte de la persona contient le mot "Cartographe" → le mock `MockLLMClient._default_response()` (lignes 69-70 de `run_experiment.py`) détecte `"cartographe"` en minuscules et retourne une réponse **format cartographe** (JSON objet) au lieu du **format parseur** (JSONL avec `reasoning: {steps: [...]}`).
+
+Résultat : `KeyError: 'dialogue_act'` lors du parsing car la réponse mock n'a pas la structure attendue par `ParseurOutput.from_jsonl()`.
+
+### Ligne exacte en cause
+```python
+# run_experiment.py, lignes 69-70
+elif "CARTOGRAPHE" in prompt_text or "cartographe" in prompt_text.lower():
+    return self._cartographe_response()  # ← Mauvais format pour parseur avec persona
+```
+
+### Cause racine
+Détection du rôle par **recherche de sous-chaînes** dans le prompt complet (texte libre). Une persona peut contenir n'importe quel mot-clé (Cartographe, Arbitre, Noyau, Débat...), cassant la logique de routing du mock.
+
+### Workaround actuel
+Néant — non bloquant pour les vrais tests LLM (le vrai modèle comprend le rôle via les instructions structurelles du prompt, pas via mots-clés). Les erreurs n'apparaissent qu'avec le mock.
+
+### Fix futur recommandé (dette technique)
+Remplacer la détection par mots-clés par un **marqueur structurel explicite** :
+1. Ajouter un paramètre `role: Literal["extraction", "parseur", "arbitre", "cartographe", "noyau"]` à `isolated_call()` / `make_arbiter_call()`
+2. Le mock route sur ce paramètre structuré, **jamais** sur le contenu du prompt
+3. Les pipelines passent le rôle explicite (ex: `role="parseur"` pour P3/P4 parseurs, `role="arbitre"` pour P3 arbitre, etc.)
+
+**Non corrigé maintenant** — documenté pour prochaine refactorisation mock.

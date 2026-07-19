@@ -10,7 +10,7 @@ from typing import List, Dict, Any
 from dataclasses import dataclass
 
 from pipelines.common.isolation import isolated_call, IsolationConfig, make_arbiter_call, validate_isolation
-from pipelines.common.prompts import get_prompt
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
     DialogueAct, EpistemicState, ConfidenceLevel, ParseurOutput, ArbitreOutput
@@ -32,24 +32,30 @@ def run_p3_parseurs(
     n_parseurs: int = 3,
     seed: int = 42,
     max_tokens: int = 2000,
-    temperature: float = 0.6
+    temperature: float = 0.6,
+    cycle_label: str = "A",
 ) -> List[ParseurOutput]:
     """N parseurs isolés — sortie structurée (PAS de confidence)."""
     config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
-    prompt = get_prompt("P3_parseur", corpus_text=corpus_text)
     
-    outputs = []
+    parseurs = []
     for i in range(n_parseurs):
-        instance_seed = seed * 1000 + i
+        parseur_id = f"p3_parseur_{i}"
+        
+        # Injection persona si Cycle B
+        if cycle_label == "B":
+            prompt = get_prompt_with_persona("P3_parseur", instance_id=parseur_id, corpus_text=corpus_text)
+        else:
+            prompt = get_prompt("P3_parseur", corpus_text=corpus_text)
         
         raw = isolated_call(client, config, prompt, corpus_text)
         
         # Parse JSONL → ParseurOutput
-        parseur = ParseurOutput.from_jsonl(raw, parseur_id=f"p3_parseur_{i}")
-        outputs.append(parseur)
-        print(f"[P3 Parseurs] p3_parseur_{i}: {len(parseur.assertions)} assertions")
+        parseur = ParseurOutput.from_jsonl(raw, parseur_id=parseur_id)
+        parseurs.append(parseur)
+        print(f"[P3 Parseurs] {parseur_id}: {len(parseur.assertions)} assertions")
     
-    return outputs
+    return parseurs
 
 
 def run_p3_arbitre(
@@ -127,7 +133,9 @@ def run_p3(
     seed: int = 42,
     max_tokens: int = 2000,
     temperature: float = 0.6,
-    cycle_num: int = 0
+    cycle_num: int = 0,
+    cycle_label: str = "A",
+    **kwargs
 ) -> P3Result:
     """Pipeline P3 complet."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -136,7 +144,8 @@ def run_p3(
     parseur_outputs = run_p3_parseurs(
         client, model, corpus_text,
         n_parseurs=n_parseurs, seed=seed,
-        max_tokens=max_tokens, temperature=temperature
+        max_tokens=max_tokens, temperature=temperature,
+        cycle_label=cycle_label
     )
     
     for p in parseur_outputs:
@@ -144,7 +153,7 @@ def run_p3(
             p.to_jsonl(), encoding='utf-8'
         )
     
-    # Arbitre
+    # Arbitre (SANS persona - reçoit seulement sorties parseurs)
     arbiter_output = run_p3_arbitre(
         client, model, parseur_outputs,
         seed=seed, max_tokens=max_tokens, temperature=temperature
@@ -161,7 +170,7 @@ def run_p3(
             encoding='utf-8'
         )
     
-    print(f"[P3 Cycle {cycle_num}] {len(arbiter_output.assertions)} assertions finales "
+    print(f"[P3 Cycle {cycle_num} ({cycle_label})] {len(arbiter_output.assertions)} assertions finales "
           f"({sum(1 for a in arbiter_output.assertions if a.confidence == ConfidenceLevel.FORT)} FORT), "
           f"{len(arbiter_output.non_convergence_zones)} zones non-convergence")
     
@@ -180,16 +189,17 @@ def run_p3_cycle(
     cycle_num: int,
     n_parseurs: int = 3,
     seed: int = 42,
+    cycle_label: str = "A",
     **kwargs
 ) -> Dict[str, Any]:
     """Interface pour run_experiment.py."""
     corpus_text = corpus_path.read_text(encoding='utf-8')
-    output_dir = output_base / f"cycle_{cycle_num}" / "raw_outputs"
+    output_dir = output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"
     
     result = run_p3(
         client, model, corpus_text, output_dir,
         n_parseurs=n_parseurs, seed=seed + cycle_num * 1000,
-        cycle_num=cycle_num, **kwargs
+        cycle_num=cycle_num, cycle_label=cycle_label, **kwargs
     )
     
     fort_count = sum(1 for a in result.arbiter_output.assertions if a.confidence == ConfidenceLevel.FORT)
@@ -197,6 +207,7 @@ def run_p3_cycle(
     return {
         "pipeline": "P3",
         "cycle": cycle_num,
+        "cycle_label": cycle_label,
         "n_parseurs": n_parseurs,
         "assertions_final": len(result.arbiter_output.assertions),
         "fort_count": fort_count,

@@ -130,9 +130,168 @@ Cela force l'exécution dans l'environnement Nix avec tous les packages disponib
 Attente décisions ARBITRE_FINAL sur D1, D2, D3 avant poursuite.
 
 ---
+ 
+## Vérification injection persona et séparation cycles A/B
+ 
+**Date** : 2026-07-19
+**Contexte** : Vérification bloquante avant commit des fichiers en attente (schemas.py, pipeline_p0.py, p3.py, p4.py, run_experiment.py, HYPOTHESES.md, etc.)
+ 
+### 1. INJECTION PERSONA CYCLE B — NON CÂBLÉE
+ 
+**Preuve** : Les pipelines appellent `get_prompt()` SANS passer `instance_id` ni `cycle_label`. La fonction `get_prompt_with_persona()` existe dans `prompts.py` (ligne 218) et injecte correctement la persona, mais **AUCUN pipeline ne l'utilise**.
+ 
+```bash
+# Recherche dans tout le code pipelines/
+$ grep -r "get_prompt_with_persona" pipelines/
+# → AUCUN RÉSULTAT
+ 
+# Recherche usage cycle_label
+$ grep -r "cycle_label" pipelines/
+# → AUCUN RÉSULTAT
+```
+ 
+**Exemples concrets** (extraction prompts d'instance) :
+ 
+| Pipeline | Appel prompt réel | Reçoit cycle_label ? |
+|----------|-------------------|---------------------|
+| P0 | `get_prompt("P0_extraction", corpus_text=corpus_text)` | Non |
+| P1 | `get_prompt("P1_round1", corpus_text=corpus_text)` | Non |
+| P1 | `get_prompt("P1_roundN", corpus_text=corpus_text, ...)` | Non |
+| P2 | `get_prompt("P2_extraction", corpus_text=corpus_text)` | Non |
+| P3 | `get_prompt("P3_parseur", corpus_text=corpus_text)` | Non |
+| P4 | `get_prompt("P4_parser", corpus_text=corpus_text)` | Non |
+ 
+**Test diff concret** (exécution hors LLM, prompt seulement) :
+ 
+```python
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 
+# Cycle A (baseline) - prompt tel que utilisé ACTUELLEMENT par tous les pipelines
+p_A = get_prompt("P1_round1", corpus_text="TEST CORPUS")
+
+# Cycle B - prompt qui DEVRAIT être utilisé si cycle_label injecté
+p_B = get_prompt_with_persona("P1_round1", instance_id="p1_instance_0", corpus_text="TEST CORPUS")
+
+# Résultat
+"PERSONA ASSIGNÉE" in p_A  # → False
+"PERSONA ASSIGNÉE" in p_B  # → True
+"Vérificateur de Cohérence" in p_B  # → True
+```
+ 
+**Constat** : **Cycle A et Cycle B envoient des prompts IDENTIQUES** aux LLM. L'injection persona n'est pas câblée — le paramètre `cycle_label` est reçu par `run_experiment.py` → `run_pX_cycle()` via `**kwargs` mais **ignoré** dans tous les pipelines.
+ 
+---
+ 
+### 2. COLLISION CHEMIN SORTIE CYCLE A / CYCLE B — CONFIRMÉE
+ 
+**Preuve** : Tous les pipelines construisent `output_dir = output_base / f"cycle_{cycle_num}" / "raw_outputs"` sans inclure `cycle_label`.
+ 
+| Pipeline | Ligne construction output_dir |
+|----------|-------------------------------|
+| P0 | `pipeline_p0.py:160` : `output_base / f"cycle_{cycle_num}" / "raw_outputs"` |
+| P1 | `pipeline_p1.py:245` : `output_base / f"cycle_{cycle_num}" / "raw_outputs"` |
+| P2 | `pipeline_p2.py:158` : `output_base / f"cycle_{cycle_num}" / "raw_outputs"` |
+| P3 | `pipeline_p3.py:188` : `output_base / f"cycle_{cycle_num}" / "raw_outputs"` |
+| P4 | `pipeline_p4.py:293` : `output_base / f"cycle_{cycle_num}" / "raw_outputs"` |
+ 
+**Conséquence** : Cycle A cycle 0 et Cycle B cycle 0 écrivent tous les deux dans `results/cycle_0/raw_outputs/`. Le second ÉCRASE le premier.
+ 
+**Protocole §8 attend** : Dossiers séparés `results/cycle_A_<n>/` et `results/cycle_B_<n>/` — **ÉCART CONFIRMÉ**.
+ 
+**Fichiers produits** (noms identiques pour A et B) :
+- `p0_cycle0_raw.jsonl`, `p0_cycle0_parsed.jsonl`
+- `p1_p1_instance_0_round1_cycle0_raw.jsonl`, `p1_p1_instance_0_round2_cycle0_raw.jsonl`, etc.
+- `p2_instance_0_cycle0.jsonl`, `p2_cycle0_retained.json`
+- `p3_p3_parseur_0_cycle0.jsonl`, `p3_arbitre_cycle0.jsonl`
+- `p4_p4_parseur_0_cycle0.jsonl`, `p4_p4_cartographe_0_cycle0.json`, `p4_nucleus_cycle0.jsonl`
+ 
+AUCUN fichier ne porte trace de A ou B.
+ 
+---
+ 
+## Fix 1 — Injection persona Cycle B (après validation des constats)
+ 
+**Date** : 2026-07-19
+ 
+### Modifications
+ 
+| Fichier | Changement |
+|---------|------------|
+| `pipelines/pipeline_p0.py` | Import `get_prompt_with_persona` ; `run_p0()` accepte `cycle_label` + `instance_id` ; utilise `get_prompt_with_persona` si `cycle_label == "B"` ; `run_p0_cycle` passe `cycle_label` et `output_dir = cycle_{cycle_label}_{cycle_num}` |
+| `pipelines/pipeline_p1.py` | Import `get_prompt_with_persona` ; `run_p1_debate()` accepte `cycle_label` ; Round 1 utilise `get_prompt_with_persona` si Cycle B ; `run_p1_cycle` passe `cycle_label` et `output_dir = cycle_{cycle_label}_{cycle_num}` |
+| `pipelines/pipeline_p2.py` | Import `get_prompt_with_persona` ; `run_p2_instances()` accepte `cycle_label` ; utilise `get_prompt_with_persona` si Cycle B par instance ; `run_p2`/`run_p2_cycle` propagent `cycle_label` et `output_dir = cycle_{cycle_label}_{cycle_num}` |
+| `pipelines/pipeline_p3.py` | Import `get_prompt_with_persona` ; `run_p3_parseurs()` accepte `cycle_label` ; utilise `get_prompt_with_persona` si Cycle B (parseurs seulement, **pas** arbitre) ; `run_p3`/`run_p3_cycle` propagent `cycle_label` et `output_dir = cycle_{cycle_label}_{cycle_num}` |
+| `pipelines/pipeline_p4.py` | Import `get_prompt_with_persona` ; `run_p4_parseurs()` accepte `cycle_label` ; utilise `get_prompt_with_persona` si Cycle B (parseurs seulement, **pas** cartographes/noyau) ; `run_p4`/`run_p4_cycle` propagent `cycle_label` et `output_dir = cycle_{cycle_label}_{cycle_num}` |
+ 
+### Règle respectée
+- **Seuls les prompts d'extraction/lecture** reçoivent la persona (P0, P1 round1, P2, P3 parseurs, P4 parseurs)
+- **Jamais** les arbitres/cartographes/noyau (ils ne voient que les sorties structurées, pas le corpus) — conforme §2bis
+- Instance mapping : `instance_0`/`parseur_0` → Vérificateur, `instance_1`/`parseur_1` → Traceur, `instance_2`/`parseur_2` → Cartographe (symétrie parfaite §2)
+ 
+### Preuve diff (exécution hors LLM)
+ 
+```python
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
+
+for key in ['P0_extraction', 'P1_round1', 'P2_extraction', 'P3_parseur', 'P4_parser']:
+    p_A = get_prompt(key, corpus_text='TEST')
+    p_B = get_prompt_with_persona(key, instance_id=f'{key.lower()}_0', corpus_text='TEST')
+    print(f'{key}: A has persona? {"PERSONA ASSIGNÉE" in p_A} | B has persona? {"PERSONA ASSIGNÉE" in p_B}')
+```
+ 
+**Résultat** :
+```
+P0_extraction: A has persona? False | B has persona? True → Vérificateur de Cohérence
+P1_round1:     A has persona? False | B has persona? True → Vérificateur de Cohérence
+P2_extraction: A has persona? False | B has persona? True → Vérificateur de Cohérence
+P3_parseur:    A has persona? False | B has persona? True → Vérificateur de Cohérence
+P4_parser:     A has persona? False | B has persona? True → Vérificateur de Cohérence
+```
+ 
+Cycle A et Cycle B envoient maintenant des prompts **DIFFÉRENTS** aux LLM.
+ 
+---
+ 
+## Fix 2 — Séparation chemins sortie Cycle A / Cycle B (après validation des constats)
+ 
+**Date** : 2026-07-19
+ 
+### Modifications
+ 
+| Fichier | Ligne | AVANT | APRÈS |
+|---------|-------|-------|-------|
+| `pipeline_p0.py` | 164 | `output_base / f"cycle_{cycle_num}" / "raw_outputs"` | `output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"` |
+| `pipeline_p1.py` | 249 | `output_base / f"cycle_{cycle_num}" / "raw_outputs"` | `output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"` |
+| `pipeline_p2.py` | 162 | `output_base / f"cycle_{cycle_num}" / "raw_outputs"` | `output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"` |
+| `pipeline_p3.py` | 197 | `output_base / f"cycle_{cycle_num}" / "raw_outputs"` | `output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"` |
+| `pipeline_p4.py` | 301 | `output_base / f"cycle_{cycle_num}" / "raw_outputs"` | `output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"` |
+ 
+### Alignement protocole §8
+ 
+> Structure attendue : `results/cycle_A_<n>/` et `results/cycle_B_<n>/`
+ 
+### Preuve `ls` (après run complet --cycles 1 --pipelines P0,P1,P2,P3,P4)
+ 
+```bash
+$ find results -type d -name "cycle_*" | sort
+results/cycle_A_0
+results/cycle_B_0
+```
+ 
+```bash
+$ ls results/cycle_A_0/raw_outputs/
+p0_cycle0_parsed.jsonl  p1_p1_instance_0_round1_cycle0_raw.jsonl  p2_instance_0_cycle0.jsonl  p3_p3_parseur_0_cycle0.jsonl  p4_p4_parseur_0_cycle0.jsonl  ...
+ 
+$ ls results/cycle_B_0/raw_outputs/
+p0_cycle0_parsed.jsonl  p1_p1_instance_0_round1_cycle0_raw.jsonl  p2_instance_0_cycle0.jsonl  p3_p3_parseur_0_cycle0.jsonl  p4_p4_parseur_0_cycle0.jsonl  ...
+```
+ 
+**Cycle A et Cycle B ont maintenant des dossiers séparés** — plus d'écrasement.
+ 
+---
+ 
 ## Note protocole (mandat effectif)
-
+ 
 Ce fichier sert de `SETUP_LOG.md` demandé par `docs/spec/a_prompt_cadrage_nemotron.md` :
 - Document normatif lu en lecture seule : `docs/spec/substrat-bench_PROTOCOL_v0_2_2.md`
 - Grille numérotation confirmée et alignée ci-dessus

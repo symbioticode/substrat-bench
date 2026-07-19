@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
 from pipelines.common.isolation import isolated_call, IsolationConfig, validate_isolation
-from pipelines.common.prompts import get_prompt
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, DialogueAct, EpistemicState
 )
@@ -76,7 +76,10 @@ def run_p0(
     seed: int = 42,
     max_tokens: int = 2000,
     temperature: float = 0.6,
-    cycle_num: int = 0
+    cycle_num: int = 0,
+    cycle_label: str = "A",
+    instance_id: str = "p0_single",
+    **kwargs
 ) -> P0Output:
     """
     Exécute pipeline P0 complet.
@@ -89,9 +92,8 @@ def run_p0(
         seed: Seed pour reproductibilité
         max_tokens, temperature: Paramètres génération
         cycle_num: Numéro de cycle (pour nommage fichiers)
-    
-    Returns:
-        P0Output avec assertions parsées
+        cycle_label: "A" (baseline) ou "B" (personas) — pour injection persona
+        instance_id: ID de l'instance (pour persona mapping en Cycle B)
     """
     start_time = time.perf_counter()
     
@@ -101,8 +103,11 @@ def run_p0(
         temperature=temperature
     )
     
-    # Prompt P0 avec source_ref obligatoire
-    prompt = get_prompt("P0_extraction", corpus_text=corpus_text)
+    # Prompt P0 avec source_ref obligatoire — injection persona si Cycle B
+    if cycle_label == "B":
+        prompt = get_prompt_with_persona("P0_extraction", instance_id=instance_id, corpus_text=corpus_text)
+    else:
+        prompt = get_prompt("P0_extraction", corpus_text=corpus_text)
     
     # Appel isolé garanti
     raw_output = isolated_call(client, config, prompt, corpus_text)
@@ -148,6 +153,7 @@ def run_p0_cycle(
     output_base: Path,
     cycle_num: int,
     seed: int = 42,
+    cycle_label: str = "A",
     **kwargs
 ) -> Dict[str, Any]:
     """
@@ -156,7 +162,7 @@ def run_p0_cycle(
     Returns dict avec métriques brutes pour aggregation ultérieure.
     """
     corpus_text = corpus_path.read_text(encoding='utf-8')
-    output_dir = output_base / f"cycle_{cycle_num}" / "raw_outputs"
+    output_dir = output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"
     
     result = run_p0(
         client=client,
@@ -165,12 +171,15 @@ def run_p0_cycle(
         output_dir=output_dir,
         seed=seed + cycle_num * 1000,  # Seed dérivé déterministe
         cycle_num=cycle_num,
+        cycle_label=cycle_label,
+        instance_id="p0_single",
         **kwargs
     )
     
     return {
         "pipeline": "P0",
         "cycle": cycle_num,
+        "cycle_label": cycle_label,
         "assertions_count": len(result.assertions),
         "latency_ms": result.latency_ms,
         "tokens_estimate": result.tokens_estimate,

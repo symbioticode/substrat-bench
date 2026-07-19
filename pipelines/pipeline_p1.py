@@ -14,7 +14,7 @@ from pipelines.common.isolation import (
     isolated_call, IsolationConfig, 
     build_debate_round_messages, validate_isolation
 )
-from pipelines.common.prompts import get_prompt
+from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import SourceRef, StructuredAssertion, DialogueAct, EpistemicState
 from pipelines.common.agregation import SemanticClusterer, Assertion, ClusteredAssertion, majority_vote_aggregation
 
@@ -79,6 +79,7 @@ def run_p1_debate(
     seed: int = 42,
     max_tokens: int = 2000,
     temperature: float = 0.6,
+    cycle_label: str = "A",
     **kwargs
 ) -> List[P1InstanceTrace]:
     """
@@ -108,8 +109,11 @@ def run_p1_debate(
         
         for round_num in range(1, n_rounds + 1):
             if round_num == 1:
-                # Round 1 : isolation stricte
-                prompt = get_prompt("P1_round1", corpus_text=corpus_text)
+                # Round 1 : isolation stricte — injection persona si Cycle B
+                if cycle_label == "B":
+                    prompt = get_prompt_with_persona("P1_round1", instance_id=instance_id, corpus_text=corpus_text)
+                else:
+                    prompt = get_prompt("P1_round1", corpus_text=corpus_text)
                 messages = build_debate_round_messages(
                     prompt_fixe=prompt,  # Le prompt contient déjà le corpus
                     corpus_text="",       # Déjà dans prompt
@@ -238,19 +242,21 @@ def run_p1_cycle(
     seed: int = 42,
     similarity_threshold: float = 0.50,
     vote_threshold: float = 2/3,
+    cycle_label: str = "A",
     **kwargs
 ) -> Dict[str, Any]:
     """Interface pour run_experiment.py."""
     corpus_text = corpus_path.read_text(encoding='utf-8')
-    output_dir = output_base / f"cycle_{cycle_num}" / "raw_outputs"
+    output_dir = output_base / f"cycle_{cycle_label}_{cycle_num}" / "raw_outputs"
     
-    print(f"[P1 Cycle {cycle_num}] Débat {n_instances} instances × {n_rounds} rounds...")
+    print(f"[P1 Cycle {cycle_num} ({cycle_label})] Débat {n_instances} instances × {n_rounds} rounds...")
     
     traces = run_p1_debate(
         client, model, corpus_text,
         n_instances=n_instances, n_rounds=n_rounds, seed=seed + cycle_num * 1000,
         max_tokens=kwargs.get('max_tokens', 2000),
-        temperature=kwargs.get('temperature', 0.6)
+        temperature=kwargs.get('temperature', 0.6),
+        cycle_label=cycle_label
     )
     
     result = aggregate_p1_final(traces, similarity_threshold, vote_threshold)
@@ -259,6 +265,7 @@ def run_p1_cycle(
     return {
         "pipeline": "P1",
         "cycle": cycle_num,
+        "cycle_label": cycle_label,
         "n_instances": n_instances,
         "n_rounds": n_rounds,
         "assertions_final": len(result.final_retained),
