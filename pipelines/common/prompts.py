@@ -1,14 +1,23 @@
 """
-pipelines/common/prompts.py — Prompts fixes pour les 5 architectures
+pipelines/common/prompts.py -- Prompts fixes pour les 5 architectures
 Un seul modèle, prompts identiques pour comparaison équitable (§1 protocole).
+
+Cycle A: Sans personas (baseline)
+Cycle B: Avec personas anti-monosubstrat injectées dans les prompts d'extraction
 """
+
+from pipelines.common.personas import (
+    get_persona_for_instance,
+    build_persona_injection,
+    PERSONA_POSTURES,
+)
 
 PROMPTS = {
     # P0 : Passe unique, synthèse libre
     "P0_extraction": """Vous êtes un analyste expert. Lisez le corpus ci-dessous et produisez une liste d'assertions factuelles, contradictions, dérives ou lacunes que vous identifiez.
 
-FORMAT DE SORTIE (JSONL — une ligne par assertion) :
-{"text": "...", "source_ref": {"session_id": "...", "tour_n": N}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}
+FORMAT DE SORTIE (JSONL -- une ligne par assertion) :
+{{"text": "...", "source_ref": {{"session_id": "...", "tour_n": N}}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}}
 
 RÈGLES :
 - source_ref OBLIGATOIRE : session_id exact, tour_n exact du corpus
@@ -20,27 +29,11 @@ RÈGLES :
 CORPUS :
 {corpus_text}""",
 
-    # P1 : Même prompt que P0 (instances isolées, vote majoritaire après)
-    "P1_extraction": """Vous êtes un analyste expert. Lisez le corpus ci-dessous et produisez une liste d'assertions factuelles, contradictions, dérives ou lacunes que vous identifiez.
+    # P1 (DÉBAT) Round 1 : Isolation stricte -- Identique à P2_round1 précédent
+    "P1_round1": """Vous êtes un analyste expert. Lisez le corpus ci-dessous et produisez une liste d'assertions factuelles, contradictions, dérives ou lacunes que vous identifiez.
 
-FORMAT DE SORTIE (JSONL — une ligne par assertion) :
-{"text": "...", "source_ref": {"session_id": "...", "tour_n": N}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}
-
-RÈGLES :
-- source_ref OBLIGATOIRE : session_id exact, tour_n exact du corpus
-- dialogue_act : Inform (fait), Disagree (contradiction), Correct (correction), FlagGap (lacune), FlagAmbiguity (ambiguïté), Hypothesize (hypothèse β=N), Project (projection non vérifiée)
-- epistemic_state : T (soutenu), F (contredit), B (conflit), N (ignorance/ambiguïté)
-- Une assertion par ligne, JSON valide
-- Pas de texte explicatif hors JSON
-
-CORPUS :
-{corpus_text}""",
-
-    # P2 Round 1 : Identique à P1 (isolation stricte)
-    "P2_round1": """Vous êtes un analyste expert. Lisez le corpus ci-dessous et produisez une liste d'assertions factuelles, contradictions, dérives ou lacunes que vous identifiez.
-
-FORMAT DE SORTIE (JSONL — une ligne par assertion) :
-{"text": "...", "source_ref": {"session_id": "...", "tour_n": N}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}
+FORMAT DE SORTIE (JSONL -- une ligne par assertion) :
+{{"text": "...", "source_ref": {{"session_id": "...", "tour_n": N}}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}}
 
 RÈGLES :
 - source_ref OBLIGATOIRE : session_id exact, tour_n exact du corpus
@@ -52,20 +45,20 @@ RÈGLES :
 CORPUS :
 {corpus_text}""",
 
-    # P2 Round 2+ : Débat — reçoit sorties autres instances
-    "P2_roundN": """Vous êtes un analyste expert participant à un débat multi-instances.
+    # P1 (DÉBAT) Round 2+ : Débat -- reçoit sorties autres instances
+    "P1_roundN": """Vous êtes un analyste expert participant à un débat multi-instances.
 
 ROUND PREMIER : Vous avez déjà produit votre analyse initiale.
 ROUNDS SUIVANTS : Vous recevez maintenant les analyses ANONYMISÉES des autres instances.
 
 VOTRE TÂCHE : Révisez, confirmez ou retirez CHAQUE assertion à la lumière de ce qu'ont vu les autres.
 
-FORMAT DE SORTIE (JSONL — même format, assertions révisées) :
-{"text": "...", "source_ref": {"session_id": "...", "tour_n": N}, "dialogue_act": "...", "epistemic_state": "..."}
+FORMAT DE SORTIE (JSONL -- même format, assertions révisées) :
+{{"text": "...", "source_ref": {{"session_id": "...", "tour_n": N}}, "dialogue_act": "...", "epistemic_state": "..."}}
 
 INSTRUCTIONS SPÉCIFIQUES :
-- Si une autre instance a vu une contradiction que vous avez manquée → INTÉGREZ-LA
-- Si une autre instance contredit votre assertion sans preuve → RETIREZ-LA ou NUANCEZ-LA
+- Si une autre instance a vu une contradiction que vous avez manquée -> INTÉGREZ-LA
+- Si une autre instance contredit votre assertion sans preuve -> RETIREZ-LA ou NUANCEZ-LA
 - Conservez source_ref EXACT (ne changez pas session_id/tour_n)
 - Marquez dialogue_act "Correct" si vous corrigez votre propre assertion précédente
 - Une assertion par ligne, JSON valide
@@ -79,13 +72,29 @@ VOTRE SORTIE ROUND PRÉCÉDENT :
 SORTIES AUTRES INSTANCES (ANONYMES) :
 {other_outputs}""",
 
+    # P2 (VOTE MAJORITAIRE) : Instances isolées, vote après
+    "P2_extraction": """Vous êtes un analyste expert. Lisez le corpus ci-dessous et produisez une liste d'assertions factuelles, contradictions, dérives ou lacunes que vous identifiez.
+
+FORMAT DE SORTIE (JSONL -- une ligne par assertion) :
+{{"text": "...", "source_ref": {{"session_id": "...", "tour_n": N}}, "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N"}}
+
+RÈGLES :
+- source_ref OBLIGATOIRE : session_id exact, tour_n exact du corpus
+- dialogue_act : Inform (fait), Disagree (contradiction), Correct (correction), FlagGap (lacune), FlagAmbiguity (ambiguïté), Hypothesize (hypothèse β=N), Project (projection non vérifiée)
+- epistemic_state : T (soutenu), F (contredit), B (conflit), N (ignorance/ambiguïté)
+- Une assertion par ligne, JSON valide
+- Pas de texte explicatif hors JSON
+
+CORPUS :
+{corpus_text}""",
+
     # P3 Parseurs (passage 1) : Sortie STRUCTURÉE obligatoire
     "P3_parseur": """Vous êtes un PARSEUR isolé (1 de 3). Votre rôle : extraire des assertions STRUCTURÉES du corpus.
 
 CONTRAINTES STRICTES :
 - Sortie JSONL avec CHAMPS OBLIGATOIRES (pas de texte libre)
 - CHAQUE assertion DOIT avoir : text, dialogue_act, epistemic_state, source_ref, reasoning
-- PAS de champ "confidence" — assigné par l'arbitre UNIQUEMENT
+- PAS de champ "confidence" -- assigné par l'arbitre UNIQUEMENT
 - reasoning : étapes de votre analyse (1-3 phrases)
 
 SCHÉMA EXACT :
@@ -106,21 +115,21 @@ CORPUS :
 {corpus_text}""",
 
     # P3 Arbitre : Reçoit SORTIES PARSEURS seulement (JAMAIS corpus brut)
-    "P3_arbitre": """Vous êtes l'ARBITRE unique. Vous ne voyez PAS le corpus brut — seulement les 3 sorties structurées des parseurs.
+    "P3_arbitre": """Vous êtes l'ARBITRE unique. Vous ne voyez PAS le corpus brut -- seulement les 3 sorties structurées des parseurs.
 
 VOTRE RÔLE : Appliquer une RÈGLE DE COHÉRENCE (pas simple comptage) pour décider quelles assertions retenir et avec quelle CONFIANCE.
 
 RÈGLE DE COHÉRENCE :
-- Assertion portée par 3/3 parseurs → CONFIANCE FORT (sauf incohérence interne)
-- Assertion portée par 2/3 → CONFIANCE PROBABLE (si cohérence thématique)
-- Assertion portée par 1/3 MAIS avec reasoning autonome vérifiable dans source_ref → CONFIANCE FORT (argument singleton fort)
-- Assertion portée par 2/3 SANS justification distincte au-delà ressemblance → CONFIANCE FAIBLE
-- Non-convergence sur zone → signaler explicitement (non-convergence informative)
+- Assertion portée par 3/3 parseurs -> CONFIANCE FORT (sauf incohérence interne)
+- Assertion portée par 2/3 -> CONFIANCE PROBABLE (si cohérence thématique)
+- Assertion portée par 1/3 MAIS avec reasoning autonome vérifiable dans source_ref -> CONFIANCE FORT (argument singleton fort)
+- Assertion portée par 2/3 SANS justification distincte au-delà ressemblance -> CONFIANCE FAIBLE
+- Non-convergence sur zone -> signaler explicitement (non-convergence informative)
 
 CONFIANCE BINAIRE : FORT / FAIBLE
 
 SORTIE (JSONL) :
-{{"text": "...", "dialogue_act": "...", "epistemic_state": "...", "source_ref": {{...}}, "confidence": "FORT|FAIBLE", "coherence_level": "FULL|MAJORITY|SINGLETON_AUTONOME", "reasoning": {{"steps": [...], "coherence_check": "..."}}}
+{{"text": "...", "dialogue_act": "...", "epistemic_state": "...", "source_ref": {{...}}, "confidence": "FORT|FAIBLE", "coherence_level": "FULL|MAJORITY|SINGLETON_AUTONOME", "reasoning": {{"steps": [...], "coherence_check": "..."}}}}
 
 ZONES NON-CONVERGENCE (JSONL, type spécial) :
 {{"type": "non_convergence", "source_ref": {{...}}, "description": "Parseurs divergent : [raison]", "epistemic_state": "N"}}
@@ -129,7 +138,7 @@ SORTIES PARSEURS :
 {parser_outputs}""",
 
     # P4 Parseurs (identique P3)
-    "P4_parseur": """Vous êtes un PARSEUR isolé (1 de 3). Extrayez des assertions STRUCTURÉES.
+    "P4_parser": """Vous êtes un PARSEUR isolé (1 de 3). Extrayez des assertions STRUCTURÉES.
 
 SCHÉMA EXACT :
 {{"text": "...", "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N", "source_ref": {{"session_id": "...", "tour_n": N}}, "reasoning": {{"steps": ["...", "..."]}}}}
@@ -140,11 +149,11 @@ CORPUS :
 {corpus_text}""",
 
     # P4 Cartographes (passage 2) : Reçoivent SORTIES PARSEURS seulement
-    "P4_cartographe": """Vous êtes un CARTOGRAPHE (1 de 2). Vous ne voyez PAS le corpus — seulement les 3 sorties parseurs.
+    "P4_cartographe": """Vous êtes un CARTOGRAPHE (1 de 2). Vous ne voyez PAS le corpus -- seulement les 3 sorties parseurs.
 
 VOTRE RÔLE : Produire une CARTE DE COHÉRENCE par zone (source_ref regroupé).
 - Pour chaque zone : lister assertions parseurs, identifier accords/conflits
-- Assigner TRAÇABILITÉ niveau fil (Option B) : quel fil de discussion soutient quoi
+- Assigner TRACABILITÉ niveau fil (Option B) : quel fil de discussion soutient quoi
 - Préparer données pour Noyau cohérence (passage 3)
 
 SORTIE (JSONL) :
@@ -161,7 +170,7 @@ RÈGLE :
 - FORT : N/N parseurs + cartographes convergent
 - PROBABLE : (N-1)/N + cohérence cartographes
 - FAIBLE : 1/N porté par argument autonome vérifiable dans source_ref
-- NON_CONVERGENCE : divergence non résolue → signaler explicitement
+- NON_CONVERGENCE : divergence non résolue -> signaler explicitement
 
 TRACABILITÉ Option B : niveau fil (produite passage 2)
 
@@ -187,15 +196,16 @@ def get_prompt(key: str, **kwargs) -> str:
 # Validation prompts requis
 REQUIRED_PROMPTS = [
     "P0_extraction",
-    "P1_extraction",
-    "P2_round1",
-    "P2_roundN",
+    "P1_round1",
+    "P1_roundN",
+    "P2_extraction",
     "P3_parseur",
     "P3_arbitre",
-    "P4_parseur",
+    "P4_parser",
     "P4_cartographe",
     "P4_noyau",
 ]
+
 
 def validate_prompts() -> None:
     """Vérifie que tous les prompts requis existent."""
@@ -205,10 +215,41 @@ def validate_prompts() -> None:
     print(f"[OK] {len(REQUIRED_PROMPTS)} prompts validés")
 
 
+def get_prompt_with_persona(key: str, instance_id: str, corpus_text: str = "", **kwargs) -> str:
+    """
+    Récupère un prompt et y injecte la persona pour Cycle B.
+
+    Args:
+        key: Clé du prompt (ex: "P1_round1")
+        instance_id: ID de l'instance (ex: "instance_0", "parseur_0")
+        corpus_text: Texte du corpus (passé séparément pour injection pre-format)
+        **kwargs: Autres variables de formatage
+
+    Returns:
+        Prompt formaté avec injection persona si applicable
+    """
+    # Seuls les prompts d'extraction reçoivent la persona
+    extraction_keys = {
+        "P0_extraction", "P1_round1", "P1_roundN", "P2_extraction",
+        "P3_parseur", "P4_parser"
+    }
+
+    if key in extraction_keys:
+        persona_name = get_persona_for_instance(instance_id)
+        if persona_name and persona_name in PERSONA_POSTURES:
+            injection = build_persona_injection(persona_name)
+            # Injecter dans le template AVANT formatage
+            template = PROMPTS[key]
+            template_with_persona = template.replace("{corpus_text}", injection + "\n{corpus_text}")
+            return template_with_persona.format(corpus_text=corpus_text, **kwargs)
+
+    return get_prompt(key, corpus_text=corpus_text, **kwargs)
+
+
 if __name__ == "__main__":
     validate_prompts()
     # Test formatage
-    test = get_prompt("P1_extraction", corpus_text="TEST CORPUS")
+    test = get_prompt("P1_round1", corpus_text="TEST CORPUS")
     assert "TEST CORPUS" in test
     assert "source_ref" in test
     print("[OK] Prompt formatting test passed")
