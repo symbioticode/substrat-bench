@@ -1,0 +1,15 @@
+{"text": "Le budget projet est de 10 M€ pour la phase 1.", "source_ref": {"session_id": "s1", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "10 M€ ont été validés par le comité directeur.", "source_ref": {"session_id": "s1", "tour_n": 2}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Le budget est en fait de 15 M€ avec les contingences.", "source_ref": {"session_id": "s1", "tour_n": 3}, "dialogue_act": "Correct", "epistemic_state": "T"}
+{"text": "Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.", "source_ref": {"session_id": "s1", "tour_n": 3}, "dialogue_act": "Disagree", "epistemic_state": "B"}
+{"text": "Il semble que le client veuille une livraison en mars.", "source_ref": {"session_id": "s2", "tour_n": 1}, "dialogue_act": "Hypothesize", "epistemic_state": "N"}
+{"text": "Nous livrons en mars.", "source_ref": {"session_id": "s2", "tour_n": 2}, "dialogue_act": "Project", "epistemic_state": "N"}
+{"text": "Le client n'a toujours pas confirmé la date.", "source_ref": {"session_id": "s2", "tour_n": 3}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "La livraison en mars est une projection non confirmée par le client.", "source_ref": {"session_id": "s2", "tour_n": 3}, "dialogue_act": "FlagGap", "epistemic_state": "N"}
+{"text": "La nouvelle architecture réduira les coûts de 30 %.", "source_ref": {"session_id": "s3", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "N"}
+{"text": "L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.", "source_ref": {"session_id": "s3", "tour_n": 2}, "dialogue_act": "FlagGap", "epistemic_state": "N"}
+{"text": "Il faut résoudre la dette technique du module paiement.", "source_ref": {"session_id": "s4", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Nous le ferons (résoudre la dette technique du module paiement).", "source_ref": {"session_id": "s4", "tour_n": 2}, "dialogue_act": "Project", "epistemic_state": "N"}
+{"text": "Deux options restent ouvertes : refonte complète ou correctif progressif.", "source_ref": {"session_id": "s5", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Les deux options ont des avantages.", "source_ref": {"session_id": "s5", "tour_n": 2}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Aucun consensus n'est atteint sur le choix entre les deux options.", "source_ref": {"session_id": "s5", "tour_n": 2}, "dialogue_act": "Inform", "epistemic_state": "T"}

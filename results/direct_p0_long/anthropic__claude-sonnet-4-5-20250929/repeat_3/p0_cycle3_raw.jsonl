@@ -1,0 +1,16 @@
+```jsonl
+{"text": "Le budget projet est de 10 M€ pour la phase 1", "source_ref": {"session_id": "s1", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "F"}
+{"text": "10 M€ ont été validés par le comité directeur", "source_ref": {"session_id": "s1", "tour_n": 2}, "dialogue_act": "Inform", "epistemic_state": "F"}
+{"text": "Le budget est en fait de 15 M€ avec les contingences", "source_ref": {"session_id": "s1", "tour_n": 3}, "dialogue_act": "Correct", "epistemic_state": "T"}
+{"text": "Contradiction entre budget annoncé 10 M€ et budget réel 15 M€", "source_ref": {"session_id": "s1", "tour_n": 3}, "dialogue_act": "Disagree", "epistemic_state": "B"}
+{"text": "Le client veuille une livraison en mars", "source_ref": {"session_id": "s2", "tour_n": 1}, "dialogue_act": "Hypothesize", "epistemic_state": "N"}
+{"text": "Nous livrons en mars", "source_ref": {"session_id": "s2", "tour_n": 2}, "dialogue_act": "Project", "epistemic_state": "F"}
+{"text": "Le client n'a toujours pas confirmé la date", "source_ref": {"session_id": "s2", "tour_n": 3}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Dave s'engage sur une date non confirmée par le client", "source_ref": {"session_id": "s2", "tour_n": 2}, "dialogue_act": "FlagGap", "epistemic_state": "B"}
+{"text": "La nouvelle architecture réduira les coûts de 30 %", "source_ref": {"session_id": "s3", "tour_n": 1}, "dialogue_act": "Project", "epistemic_state": "N"}
+{"text": "Absence d'étude chiffrée pour justifier la réduction de 30 %", "source_ref": {"session_id": "s3", "tour_n": 2}, "dialogue_act": "FlagGap", "epistemic_state": "N"}
+{"text": "Il faut résoudre la dette technique du module paiement", "source_ref": {"session_id": "s4", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Engagement de résolution sans plan ni échéancier défini", "source_ref": {"session_id": "s4", "tour_n": 2}, "dialogue_act": "FlagGap", "epistemic_state": "N"}
+{"text": "Deux options restent ouvertes : refonte complète ou correctif progressif", "source_ref": {"session_id": "s5", "tour_n": 1}, "dialogue_act": "Inform", "epistemic_state": "T"}
+{"text": "Aucun consensus n'est atteint entre les deux options", "source_ref": {"session_id": "s5", "tour_n": 2}, "dialogue_act": "FlagAmbiguity", "epistemic_state": "N"}
+```

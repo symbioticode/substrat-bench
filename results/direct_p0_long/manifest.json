@@ -1,0 +1,2482 @@
+{
+  "protocol": "substrat-bench-P0-direct-pilot-v1",
+  "started_at": "2026-08-10T04:11:23.688402+00:00",
+  "models": [
+    "anthropic:claude-sonnet-4-5-20250929",
+    "deepseek:deepseek-v4-flash"
+  ],
+  "repeats": 5,
+  "caps_usd": {
+    "anthropic": 1.5,
+    "deepseek": 1.5
+  },
+  "authorized_window": "2026-08-10 00:00–04:00 America/Toronto",
+  "not_normative_cycle_c": true,
+  "runs": [
+    {
+      "model_requested": "anthropic:claude-sonnet-4-5-20250929",
+      "repeat": 0,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est de 15 M€ avec les contingences",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Contradiction entre budget annoncé 10 M€ (tours 1-2) et 15 M€ (tour 3)",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veuille une livraison en mars",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Dave s'engage sur une date mars non confirmée par le client",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30%",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence d'étude chiffrée pour l'estimation de réduction de 30%",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence de plan ou échéancier pour résoudre la dette technique",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes: refonte complète ou correctif progressif",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint entre les deux options",
+          "dialogue_act": "FlagAmbiguity",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "```jsonl\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget est de 15 M€ avec les contingences\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Contradiction entre budget annoncé 10 M€ (tours 1-2) et 15 M€ (tour 3)\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le client veuille une livraison en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Dave s'engage sur une date mars non confirmée par le client\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"F\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30%\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Absence d'étude chiffrée pour l'estimation de réduction de 30%\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Absence de plan ou échéancier pour résoudre la dette technique\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes: refonte complète ou correctif progressif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint entre les deux options\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"FlagAmbiguity\", \"epistemic_state\": \"N\"}\n```",
+      "transport": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "usage": {
+          "input_tokens": 995,
+          "output_tokens": 882,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "estimated_cost_usd": 0.016215,
+        "elapsed_seconds": 13.995
+      },
+      "timestamp": "2026-08-10T04:11:37.684922+00:00"
+    },
+    {
+      "model_requested": "anthropic:claude-sonnet-4-5-20250929",
+      "repeat": 1,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Contradiction entre budget annoncé 10 M€ et budget réel 15 M€",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veuille une livraison en mars",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Dave s'engage sur une date non confirmée par le client",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucune étude chiffrée ne soutient l'estimation de réduction de 30 %",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun plan d'action concret n'est défini pour résoudre la dette technique",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint entre refonte et correctif",
+          "dialogue_act": "FlagAmbiguity",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "```jsonl\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Contradiction entre budget annoncé 10 M€ et budget réel 15 M€\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le client veuille une livraison en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Dave s'engage sur une date non confirmée par le client\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"B\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Aucune étude chiffrée ne soutient l'estimation de réduction de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun plan d'action concret n'est défini pour résoudre la dette technique\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint entre refonte et correctif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"FlagAmbiguity\", \"epistemic_state\": \"N\"}\n```",
+      "transport": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "usage": {
+          "input_tokens": 995,
+          "output_tokens": 886,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "estimated_cost_usd": 0.016275,
+        "elapsed_seconds": 11.21
+      },
+      "timestamp": "2026-08-10T04:11:58.896007+00:00"
+    },
+    {
+      "model_requested": "anthropic:claude-sonnet-4-5-20250929",
+      "repeat": 2,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Contradiction sur le montant du budget validé : 10 M€ annoncé puis corrigé à 15 M€",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veuille une livraison en mars",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Engagement de livraison en mars pris sans confirmation client",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence d'étude chiffrée pour l'estimation de réduction de coûts de 30 %",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence de plan détaillé pour résoudre la dette technique",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif",
+          "dialogue_act": "FlagAmbiguity",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint sur le choix stratégique",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "```jsonl\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Contradiction sur le montant du budget validé : 10 M€ annoncé puis corrigé à 15 M€\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le client veuille une livraison en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Engagement de livraison en mars pris sans confirmation client\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"F\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Absence d'étude chiffrée pour l'estimation de réduction de coûts de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Absence de plan détaillé pour résoudre la dette technique\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"FlagAmbiguity\", \"epistemic_state\": \"N\"}\n{\"text\": \"Aucun consensus n'est atteint sur le choix stratégique\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n```",
+      "transport": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "usage": {
+          "input_tokens": 995,
+          "output_tokens": 891,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "estimated_cost_usd": 0.01635,
+        "elapsed_seconds": 10.458
+      },
+      "timestamp": "2026-08-10T04:12:19.360001+00:00"
+    },
+    {
+      "model_requested": "anthropic:claude-sonnet-4-5-20250929",
+      "repeat": 3,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Contradiction entre budget annoncé 10 M€ et budget réel 15 M€",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veuille une livraison en mars",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Dave s'engage sur une date non confirmée par le client",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence d'étude chiffrée pour justifier la réduction de 30 %",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Engagement de résolution sans plan ni échéancier défini",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint entre les deux options",
+          "dialogue_act": "FlagAmbiguity",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "```jsonl\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Contradiction entre budget annoncé 10 M€ et budget réel 15 M€\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le client veuille une livraison en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Dave s'engage sur une date non confirmée par le client\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"B\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Absence d'étude chiffrée pour justifier la réduction de 30 %\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Engagement de résolution sans plan ni échéancier défini\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint entre les deux options\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"FlagAmbiguity\", \"epistemic_state\": \"N\"}\n```",
+      "transport": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "usage": {
+          "input_tokens": 995,
+          "output_tokens": 872,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "estimated_cost_usd": 0.016065,
+        "elapsed_seconds": 10.107
+      },
+      "timestamp": "2026-08-10T04:12:39.468741+00:00"
+    },
+    {
+      "model_requested": "anthropic:claude-sonnet-4-5-20250929",
+      "repeat": 4,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est de 15 M€ avec les contingences",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Contradiction entre budget annoncé 10 M€ (tours 1-2) et 15 M€ (tour 3)",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veuille une livraison en mars",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Dave s'engage sur une date non confirmée par le client",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30%",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence d'étude chiffrée pour l'estimation de réduction de 30%",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Absence de plan ou échéancier pour résoudre la dette technique",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes: refonte complète ou correctif progressif",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint entre les deux options",
+          "dialogue_act": "FlagAmbiguity",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "```jsonl\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget est de 15 M€ avec les contingences\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Contradiction entre budget annoncé 10 M€ (tours 1-2) et 15 M€ (tour 3)\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le client veuille une livraison en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Dave s'engage sur une date non confirmée par le client\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"F\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30%\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Absence d'étude chiffrée pour l'estimation de réduction de 30%\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Absence de plan ou échéancier pour résoudre la dette technique\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes: refonte complète ou correctif progressif\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint entre les deux options\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"FlagAmbiguity\", \"epistemic_state\": \"N\"}\n```",
+      "transport": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "usage": {
+          "input_tokens": 995,
+          "output_tokens": 881,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "estimated_cost_usd": 0.0162,
+        "elapsed_seconds": 15.13
+      },
+      "timestamp": "2026-08-10T04:13:04.601314+00:00"
+    },
+    {
+      "model_requested": "deepseek:deepseek-v4-flash",
+      "repeat": 0,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il semble que le client veuille une livraison en mars.",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La livraison en mars est une projection non vérifiée, car la confirmation du client est absente.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous le ferons (résoudre la dette technique du module paiement).",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Les deux options ont des avantages; aucun consensus n'est atteint.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "L'engagement de Henry de résoudre la dette technique manque de détails sur le calendrier ou les ressources.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Il semble que le client veuille une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"La livraison en mars est une projection non vérifiée, car la confirmation du client est absente.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"N\"}\n{\"text\": \"L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Nous le ferons (résoudre la dette technique du module paiement).\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Les deux options ont des avantages; aucun consensus n'est atteint.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"L'engagement de Henry de résoudre la dette technique manque de détails sur le calendrier ou les ressources.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}",
+      "transport": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "usage": {
+          "input_tokens": 873,
+          "output_tokens": 876,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 873
+        },
+        "estimated_cost_usd": 0.005253,
+        "elapsed_seconds": 7.557
+      },
+      "timestamp": "2026-08-10T04:13:22.160853+00:00"
+    },
+    {
+      "model_requested": "deepseek:deepseek-v4-flash",
+      "repeat": 1,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il semble que le client veuille une livraison en mars.",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La livraison en mars est une projection non confirmée par le client.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous le ferons (résoudre la dette technique du module paiement).",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Les deux options ont des avantages.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint sur le choix entre les deux options.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Il semble que le client veuille une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"La livraison en mars est une projection non confirmée par le client.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"N\"}\n{\"text\": \"L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Nous le ferons (résoudre la dette technique du module paiement).\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Les deux options ont des avantages.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint sur le choix entre les deux options.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}",
+      "transport": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "usage": {
+          "input_tokens": 873,
+          "output_tokens": 852,
+          "prompt_cache_hit_tokens": 768,
+          "prompt_cache_miss_tokens": 105
+        },
+        "estimated_cost_usd": 0.00438036,
+        "elapsed_seconds": 6.84
+      },
+      "timestamp": "2026-08-10T04:13:39.004322+00:00"
+    },
+    {
+      "model_requested": "deepseek:deepseek-v4-flash",
+      "repeat": 2,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "F",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veut une livraison en mars.",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client veut une livraison en mars.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous le ferons.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Les deux ont des avantages.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"F\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"F\"}\n{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le client veut une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le client veut une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Nous le ferons.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Les deux ont des avantages.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}",
+      "transport": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "usage": {
+          "input_tokens": 873,
+          "output_tokens": 1068,
+          "prompt_cache_hit_tokens": 768,
+          "prompt_cache_miss_tokens": 105
+        },
+        "estimated_cost_usd": 0.00546036,
+        "elapsed_seconds": 7.69
+      },
+      "timestamp": "2026-08-10T04:13:56.697298+00:00"
+    },
+    {
+      "model_requested": "deepseek:deepseek-v4-flash",
+      "repeat": 3,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il semble que le client veuille une livraison en mars.",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La livraison en mars est une hypothèse non confirmée, car le client n'a pas validé la date.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de référence.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous le ferons (résoudre la dette technique du module paiement).",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Les deux options ont des avantages.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint sur le choix entre refonte complète et correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Il semble que le client veuille une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"La livraison en mars est une hypothèse non confirmée, car le client n'a pas validé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"N\"}\n{\"text\": \"L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de référence.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Nous le ferons (résoudre la dette technique du module paiement).\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Les deux options ont des avantages.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint sur le choix entre refonte complète et correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}",
+      "transport": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "usage": {
+          "input_tokens": 873,
+          "output_tokens": 867,
+          "prompt_cache_hit_tokens": 768,
+          "prompt_cache_miss_tokens": 105
+        },
+        "estimated_cost_usd": 0.00445536,
+        "elapsed_seconds": 5.733
+      },
+      "timestamp": "2026-08-10T04:14:12.433329+00:00"
+    },
+    {
+      "model_requested": "deepseek:deepseek-v4-flash",
+      "repeat": 4,
+      "status": "ok",
+      "assertions": [
+        {
+          "text": "Le budget projet est de 10 M€ pour la phase 1.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "10 M€ ont été validés par le comité directeur.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget est en fait de 15 M€ avec les contingences.",
+          "dialogue_act": "Correct",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.",
+          "dialogue_act": "Disagree",
+          "source_ref": {
+            "session_id": "s1",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "B",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il semble que le client veuille une livraison en mars.",
+          "dialogue_act": "Hypothesize",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous livrons en mars.",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Le client n'a toujours pas confirmé la date.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La livraison en mars est incertaine car le client n'a pas confirmé la date.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s2",
+            "tour_n": 3,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "La nouvelle architecture réduira les coûts de 30 %.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.",
+          "dialogue_act": "FlagGap",
+          "source_ref": {
+            "session_id": "s3",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Il faut résoudre la dette technique du module paiement.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Nous le ferons (résoudre la dette technique du module paiement).",
+          "dialogue_act": "Project",
+          "source_ref": {
+            "session_id": "s4",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "N",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Deux options restent ouvertes : refonte complète ou correctif progressif.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 1,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Les deux options ont des avantages.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        },
+        {
+          "text": "Aucun consensus n'est atteint sur les deux options.",
+          "dialogue_act": "Inform",
+          "source_ref": {
+            "session_id": "s5",
+            "tour_n": 2,
+            "locuteur": "",
+            "char_start": null,
+            "char_end": null
+          },
+          "epistemic_state": "T",
+          "reasoning": null,
+          "parseur_id": "p0_single",
+          "timestamp": ""
+        }
+      ],
+      "raw_output": "{\"text\": \"Le budget projet est de 10 M€ pour la phase 1.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"10 M€ ont été validés par le comité directeur.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget est en fait de 15 M€ avec les contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Correct\", \"epistemic_state\": \"T\"}\n{\"text\": \"Le budget de 10 M€ pour la phase 1 est contredit par l'affirmation ultérieure de 15 M€ avec contingences.\", \"source_ref\": {\"session_id\": \"s1\", \"tour_n\": 3}, \"dialogue_act\": \"Disagree\", \"epistemic_state\": \"B\"}\n{\"text\": \"Il semble que le client veuille une livraison en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 1}, \"dialogue_act\": \"Hypothesize\", \"epistemic_state\": \"N\"}\n{\"text\": \"Nous livrons en mars.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Le client n'a toujours pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"La livraison en mars est incertaine car le client n'a pas confirmé la date.\", \"source_ref\": {\"session_id\": \"s2\", \"tour_n\": 3}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"La nouvelle architecture réduira les coûts de 30 %.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"N\"}\n{\"text\": \"L'estimation de réduction des coûts de 30 % manque d'étude chiffrée de soutien.\", \"source_ref\": {\"session_id\": \"s3\", \"tour_n\": 2}, \"dialogue_act\": \"FlagGap\", \"epistemic_state\": \"N\"}\n{\"text\": \"Il faut résoudre la dette technique du module paiement.\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Nous le ferons (résoudre la dette technique du module paiement).\", \"source_ref\": {\"session_id\": \"s4\", \"tour_n\": 2}, \"dialogue_act\": \"Project\", \"epistemic_state\": \"N\"}\n{\"text\": \"Deux options restent ouvertes : refonte complète ou correctif progressif.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 1}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Les deux options ont des avantages.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}\n{\"text\": \"Aucun consensus n'est atteint sur les deux options.\", \"source_ref\": {\"session_id\": \"s5\", \"tour_n\": 2}, \"dialogue_act\": \"Inform\", \"epistemic_state\": \"T\"}",
+      "transport": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "usage": {
+          "input_tokens": 873,
+          "output_tokens": 854,
+          "prompt_cache_hit_tokens": 768,
+          "prompt_cache_miss_tokens": 105
+        },
+        "estimated_cost_usd": 0.00439036,
+        "elapsed_seconds": 7.442
+      },
+      "timestamp": "2026-08-10T04:14:29.879713+00:00"
+    }
+  ],
+  "estimated_spend_usd": {
+    "anthropic": 0.081105,
+    "deepseek": 0.02393944
+  },
+  "finished_at": "2026-08-10T04:14:39.883816+00:00"
+}

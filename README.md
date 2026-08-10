@@ -25,6 +25,12 @@ et un second modèle/provider disponible.
 Résultat réel du 10 août 2026 :
 [KB pilote P0 Omniroute](kb/2026-08-10_pilote-p0-omniroute.md).
 
+Un second pilote a ensuite utilisé les APIs directes Anthropic et DeepSeek,
+cinq répétitions chacune. DeepSeek ne signale jamais l'ambiguïté genuine et
+rarement la lacune paiement; l'union inter-provider les récupère grâce à
+Sonnet. Voir
+[KB pilote P0 direct](kb/2026-08-10_pilote-p0-direct-inter-provider.md).
+
 ## Vérifications légères
 
 ```bash

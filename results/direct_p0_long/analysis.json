@@ -1,0 +1,51 @@
+{
+  "protocol": "substrat-bench-P0-direct-pilot-v1",
+  "descriptive_only_not_m09": true,
+  "models": {
+    "anthropic:claude-sonnet-4-5-20250929": {
+      "runs": 5,
+      "assertion_counts": [
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "target_detection_frequency": {
+        "budget_contradiction": 5,
+        "date_drift": 5,
+        "unsupported_claim": 5,
+        "payment_open_gap": 5,
+        "genuine_ambiguity": 5
+      }
+    },
+    "deepseek:deepseek-v4-flash": {
+      "runs": 5,
+      "assertion_counts": [
+        15,
+        15,
+        20,
+        15,
+        15
+      ],
+      "target_detection_frequency": {
+        "budget_contradiction": 5,
+        "date_drift": 5,
+        "unsupported_claim": 5,
+        "payment_open_gap": 1,
+        "genuine_ambiguity": 0
+      }
+    }
+  },
+  "paired_cross_provider_union_frequency": {
+    "budget_contradiction": 5,
+    "date_drift": 5,
+    "unsupported_claim": 5,
+    "payment_open_gap": 5,
+    "genuine_ambiguity": 5
+  },
+  "estimated_spend_usd": {
+    "anthropic": 0.081105,
+    "deepseek": 0.02393944
+  }
+}

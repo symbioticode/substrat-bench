@@ -10,6 +10,12 @@ indisponible; ce pilote ne vaut ni Cycles A/B ni Cycle C normatif. Voir
 `origin/main` reste incomplet (module personas absent du dépôt). La branche
 `codex/omniroute-autonome-20260810` restaure le minimum importable et testé.
 
+**Pilote P0 direct (2026-08-10)** : 5/5 Sonnet 4.5 et 5/5 DeepSeek V4
+réussis sous budgets durs. Sonnet détecte les cinq zones attendues 5/5;
+DeepSeek détecte la lacune paiement 1/5 et l'ambiguïté 0/5. Union des deux
+providers : 5/5 sur chaque zone. Résultat descriptif, explicitement non M09 et
+non Cycle C. Voir `kb/2026-08-10_pilote-p0-direct-inter-provider.md`.
+
 ## Sprint courant : 0
 ## Statut : PRÊT
 ## Version : v0.1
