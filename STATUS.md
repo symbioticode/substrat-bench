@@ -1,5 +1,15 @@
 # STATUS.md — État du chantier (source de vérité)
 
+## Mise à jour branche Omniroute — 2026-08-10
+
+Pilote P0 réel terminé sur deux LLM Mistral (5 répétitions chacun, 10/10
+succès, cache MISS, coût Omniroute déclaré nul). Le second provider reste
+indisponible; ce pilote ne vaut ni Cycles A/B ni Cycle C normatif. Voir
+`kb/2026-08-10_pilote-p0-omniroute.md`.
+
+`origin/main` reste incomplet (module personas absent du dépôt). La branche
+`codex/omniroute-autonome-20260810` restaure le minimum importable et testé.
+
 ## Sprint courant : 0
 ## Statut : PRÊT
 ## Version : v0.1

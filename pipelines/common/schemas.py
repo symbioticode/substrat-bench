@@ -4,7 +4,7 @@ Inspirés DiAML (ISO 24617-2) mais minimalistes pour ETAU/SECS.
 Validation M06 (traçabilité) + confiance graduée.
 """
 
-from typing import List, Dict, Any, Optional, Literal
+from typing import List, Dict, Any, Optional, Literal, Tuple
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 import json
@@ -82,10 +82,8 @@ class StructuredAssertion:
     # Contenu
     text: str
     dialogue_act: DialogueAct
-    epistemic_state: EpistemicState = EpistemicState.N
-    
-    # Traçabilité obligatoire
     source_ref: SourceRef
+    epistemic_state: EpistemicState = EpistemicState.N
     
     # Raisonnement (optionnel pour parseurs, requis pour arbitres)
     reasoning: Optional[ReasoningTrace] = None
@@ -100,7 +98,10 @@ class StructuredAssertion:
         d["epistemic_state"] = self.epistemic_state.value
         d["source_ref"] = asdict(self.source_ref)
         if self.reasoning:
-            d["reasoning"] = asdict(self.reasoning)
+            if isinstance(self.reasoning, ReasoningTrace):
+                d["reasoning"] = asdict(self.reasoning)
+            else:
+                d["reasoning"] = {"steps": [str(self.reasoning)]}
         return d
     
     @classmethod
@@ -110,7 +111,11 @@ class StructuredAssertion:
         d["epistemic_state"] = EpistemicState(d["epistemic_state"])
         d["source_ref"] = SourceRef(**d["source_ref"])
         if d.get("reasoning"):
-            d["reasoning"] = ReasoningTrace(**d["reasoning"])
+            reasoning = d["reasoning"]
+            if isinstance(reasoning, str):
+                d["reasoning"] = ReasoningTrace(steps=[reasoning])
+            else:
+                d["reasoning"] = ReasoningTrace(**reasoning)
         return cls(**d)
 
 
@@ -120,7 +125,7 @@ class ArbitratedAssertion(StructuredAssertion):
     Assertion après arbitrage (P3/P4 sortie finale).
     AJOUTE confidence (assignée PAR L'ARBITRE seulement, jamais parseur).
     """
-    confidence: ConfidenceLevel
+    confidence: ConfidenceLevel = ConfidenceLevel.FAIBLE
     # Pour P4 : niveau de cohérence (N/N, (N-1)/N, 1/N + argument autonome)
     coherence_level: Optional[str] = None  # "FULL", "MAJORITY", "SINGLETON_AUTONOME"
     

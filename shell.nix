@@ -5,7 +5,7 @@ pkgs.mkShell {
   packages = with pkgs.python312Packages; [
     python
     pip
-    pytorch        # Framework PyTorch CPU pré-compilé
+    torch          # Framework PyTorch CPU pré-compilé (pytorch renommé dans nixpkgs)
     transformers
     sentence-transformers
     scikit-learn
