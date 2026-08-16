@@ -34,7 +34,9 @@
 - P2 = six lectures indépendantes réutilisées par P2@3/P2@4/P2@6.
 - Registre d'inférence : exactement 23 réponses par répétition complète.
 - M05 vectorielle, M09/M10 et comparaisons Question 0 générées.
-- Gate mock A/B : 46/46 lignes ; suite dédiée : 8/8 tests.
+- Gate mock A/B : 46/46 lignes ; suite dédiée : 9/9 tests.
+- Observabilité AGNOS v2 : état du runner et de P0–P4, sans remplacement du
+  registre scientifique (`docs/agnos-research-profile.md`).
 - Les fichiers corpus et vérité terrain suivis sur `main` sont vides. Le contenu
   non commité de l'ancien worktree n'est pas intégré implicitement.
 

@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Any
@@ -22,6 +23,7 @@ from pipelines.pipeline_p3 import run_p3_cycle
 from pipelines.pipeline_p4 import run_p4_cycle
 from metrics.metrics import run_all_metrics
 from pipelines.common.isolation import InferenceLedger
+from pipelines.common.agnos_observability import AgnosEventWriter
 
 PIPELINE_FUNCS = {
     "P0": run_p0_cycle,
@@ -115,6 +117,7 @@ def run_cycle(
     output_base: Path,
     seed: int = 42,
     cycle_label: str = "A",
+    agnos_writer: AgnosEventWriter = None,
     **kwargs
 ) -> List[Dict[str, Any]]:
     """Exécute un cycle complet sur tous les pipelines demandés."""
@@ -133,6 +136,17 @@ def run_cycle(
             continue
         
         func = PIPELINE_FUNCS[pipeline_name]
+        agent_id = f"substrat-{pipeline_name.lower()}"
+        task = f"cycle_{cycle_label}/repetition_{cycle_num}"
+        artifact_ref = f"cycle_{cycle_label}_{cycle_num}/cycle_summary.json"
+        if agnos_writer:
+            agnos_writer.emit(
+                agent_id=agent_id, status="en_cours", task=task,
+                detail=f"Démarrage du pipeline {pipeline_name}.",
+                lifecycle="actif", health="operationnel",
+                pipeline=pipeline_name, cycle=cycle_label,
+                repetition=cycle_num, artifact_ref=artifact_ref,
+            )
         try:
             print(f"\n--- {pipeline_name} ---")
             pipeline_kwargs = dict(kwargs)
@@ -152,6 +166,14 @@ def run_cycle(
             )
             result["timestamp"] = datetime.now(timezone.utc).isoformat()
             cycle_results.append(result)
+            if agnos_writer:
+                agnos_writer.emit(
+                    agent_id=agent_id, status="succès", task=task,
+                    detail=f"Pipeline {pipeline_name} terminé sans exception.",
+                    lifecycle="termine", health="operationnel",
+                    pipeline=pipeline_name, cycle=cycle_label,
+                    repetition=cycle_num, artifact_ref=artifact_ref,
+                )
             
         except Exception as e:
             print(f"[ERROR] {pipeline_name} cycle {cycle_num}: {e}")
@@ -163,6 +185,14 @@ def run_cycle(
                 "error": str(e),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             })
+            if agnos_writer:
+                agnos_writer.emit(
+                    agent_id=agent_id, status="échec", task=task,
+                    detail=f"Pipeline {pipeline_name} interrompu: {type(e).__name__}: {e}",
+                    lifecycle="termine", health="erreur",
+                    pipeline=pipeline_name, cycle=cycle_label,
+                    repetition=cycle_num, artifact_ref=artifact_ref,
+                )
     
     return cycle_results
 
@@ -220,6 +250,10 @@ def main():
     parser.add_argument("--skip-metrics", action="store_true", help="Ne pas calculer métriques")
     parser.add_argument("--personas", choices=["off", "on", "both"], default="both",
                         help="Cycles A, B ou les deux")
+    parser.add_argument("--run-id", default=None,
+                        help="Identifiant du run dans les événements AGNOS")
+    parser.add_argument("--agnos-events", default=None,
+                        help="Flux AGNOS v2 (défaut: <output>/agnos_events.jsonl)")
     
     args = parser.parse_args()
     
@@ -231,6 +265,12 @@ def main():
         print(f"[ERROR] Registre déjà présent: {ledger_path}; utilisez un dossier --output neuf")
         sys.exit(2)
     ledger = InferenceLedger(ledger_path)
+    run_id = args.run_id or f"substrat-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
+    agnos_path = Path(args.agnos_events) if args.agnos_events else output_base / "agnos_events.jsonl"
+    if agnos_path.exists():
+        print(f"[ERROR] Flux AGNOS déjà présent: {agnos_path}; utilisez une cible neuve")
+        sys.exit(2)
+    agnos_writer = AgnosEventWriter(agnos_path, run_id)
     
     # Chargement corpus
     corpus_path = REPO_ROOT / args.corpus
@@ -249,6 +289,11 @@ def main():
     # Client LLM
     client = get_llm_client(args.model, args.provider)
     print(f"[INFO] Client LLM: {args.provider} / {args.model}")
+    agnos_writer.emit(
+        agent_id="substrat-runner", status="en_cours", task="run expérimental",
+        detail="Initialisation du harnais substrat-bench.",
+        lifecycle="actif", health="operationnel", artifact_ref=".",
+    )
     
     # Paramètres partagés (VARIABLES.md)
     common_kwargs = {
@@ -278,6 +323,7 @@ def main():
             output_base=output_base,
             seed=args.seed,
             cycle_label=cycle_label,
+            agnos_writer=agnos_writer,
             **common_kwargs
         )
         all_results.extend(cycle_results)
@@ -311,6 +357,11 @@ def main():
         expected = 23 * args.cycles * len(cycle_labels)
         if ledger_rows != expected:
             print(f"[ERROR] Registre incomplet: {ledger_rows} lignes, {expected} attendues")
+            agnos_writer.emit(
+                agent_id="substrat-runner", status="échec", task="run expérimental",
+                detail=f"Registre incomplet: {ledger_rows}/{expected} réponses.",
+                lifecycle="termine", health="erreur", artifact_ref="inference_ledger.jsonl",
+            )
             sys.exit(3)
     
     # Résumé final
@@ -326,7 +377,17 @@ def main():
     print(f"\nRésultats dans: {output_base}")
     print(f"Hypothèses log: {hypotheses_path}")
     if errors:
+        agnos_writer.emit(
+            agent_id="substrat-runner", status="échec", task="run expérimental",
+            detail=f"Run terminé avec {len(errors)} erreur(s) de pipeline.",
+            lifecycle="termine", health="erreur", artifact_ref=".",
+        )
         sys.exit(4)
+    agnos_writer.emit(
+        agent_id="substrat-runner", status="succès", task="run expérimental",
+        detail=f"Run terminé: {len(all_results)} exécution(s) de pipeline.",
+        lifecycle="termine", health="operationnel", artifact_ref=".",
+    )
 
 
 if __name__ == "__main__":

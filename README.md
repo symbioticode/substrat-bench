@@ -134,6 +134,11 @@ append-only et le harnais refuse d'écraser un `inference_ledger.jsonl`
 existant. Une répétition complète produit exactement 23 lignes ; le plan A/B
 en produit 46.
 
+Le même dossier reçoit `agnos_events.jsonl`, une trace opérationnelle AGNOS
+v2 permettant de suivre l'état de P0–P4 sans confondre exécution technique et
+résultat scientifique. Le mapping et les champs de corrélation sont décrits
+dans [`docs/agnos-research-profile.md`](docs/agnos-research-profile.md).
+
 Consulter avant toute expérience réelle :
 
 - [`STATUS.md`](STATUS.md) — état courant et blocages ;
