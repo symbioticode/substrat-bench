@@ -86,7 +86,7 @@ def run_p2_instances(
 def aggregate_p2_vote(
     all_assertions: List[List[StructuredAssertion]],
     required_votes: int,
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
 ) -> List[ClusteredAssertion]:
     """Agrégation vote majoritaire (identique code P1 final)."""
     # Aplatir avec instance_id
@@ -118,7 +118,7 @@ def run_p2(
     seed: int = 42,
     max_tokens: int = 2000,
     temperature: float = 0.6,
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
     vote_threshold: float = 2/3,
     cycle_num: int = 0,
     cycle_label: str = "A",
@@ -171,7 +171,7 @@ def run_p2_cycle(
     cycle_num: int,
     n_instances: int = 6,
     seed: int = 42,
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
     vote_threshold: float = 2/3,
     cycle_label: str = "A",
     **kwargs

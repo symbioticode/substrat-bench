@@ -188,7 +188,7 @@ def run_p1_debate(
 
 def aggregate_p1_final(
     traces: List[P1InstanceTrace],
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
     vote_threshold: float = 2/3
 ) -> P1Result:
     """
@@ -252,7 +252,7 @@ def run_p1_cycle(
     n_instances: int = 3,
     n_rounds: int = 2,
     seed: int = 42,
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
     vote_threshold: float = 2/3,
     cycle_label: str = "A",
     **kwargs

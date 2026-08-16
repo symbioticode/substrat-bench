@@ -55,15 +55,22 @@
 
 ---
 
-## DEC-005 — Seuil similarité D4 = 0.50 (text-embedding-3-small)
+## DEC-005 — Seuil similarité D4 à calibrer
 **Date** : 2026-07-19
 **Contexte** : D4 §6 — seuil cosinus pour clustering assertions. ada-002 legacy 0.85 vs nouveaux modèles ~0.45.
 **Options** :
 - A. 0.85 (conservateur)
 - B. 0.50 (S. Anand 2024 pour text-embedding-3)
 - C. Calibré Sprint 1 sur échantillon manuel 50 paires
-**Décision** : C (défaut B=0.50, validé Sprint 1)
-**Justification** : Évite faux positifs/faux négatifs systématiques. Traçable dans BR-006.
+**Décision : C** — calibration sur 50 paires annotées avant le premier run réel.
+**Statut** : FIGÉ — seuil cosinus `0.36`.
+**Justification** : Le code utilise `all-MiniLM-L6-v2`; reprendre un seuil publié
+pour un autre modèle d'embedding serait une fausse validation. La valeur finale
+Le 2026-08-16, la calibration sur 25 paires positives et 25 négatives a donné
+précision `0.7667`, rappel `0.92`, F1 `0.8364` au seuil `0.36`. Modèle exact :
+`sentence-transformers/all-MiniLM-L6-v2`; hash SHA-256 du jeu annoté :
+`369cbee32b9f48742b2e99f064bad70c535ace5fc82cf3a63f2064814f0fd580`.
+Rapport : `corpus/d4_calibration_report.json`. Aucun fallback lexical autorisé.
 **Impact** : `VARIABLES.md` BLOC 6, `agregation.py` default
 
 ---
@@ -75,7 +82,7 @@
 - A. Niveau ligne (coût tokens élevé, traçabilité max)
 - B. Niveau fil (équilibre, produit round 2 cartographes)
 - C. Pas de traçabilité fine
-**Décision** : B (défaut, révisable)
+**Décision : B** (niveau fil, défaut révisable)
 **Justification** : Permet M06 testable sans explosion tokens. Ne tranche pas spéc finale.
 **Impact** : BR-005, `pipeline_p4.py` cartographes produisent `trace_fil`
 
@@ -84,12 +91,15 @@
 ## DEC-007 — Modèle unique pour 5 pipelines (D2)
 **Date** : 2026-07-19
 **Contexte** : §1 protocole — contrainte non-négociable : un seul modèle.
-**Options** :
-- A. Claude-3.5-Sonnet (cohérence forte, dispo API)
-- B. GPT-4o (benchmark standard)
-- C. Local Llama-3.1-70B (coût zéro, contrôle)
-**Décision** : ⏳ **EN ATTENTE D2** — à résoudre Sprint 0 par ARBITRE_FINAL
-**Justification** : Impacte tous coûts/résultats. Doit être figé avant Cycle 0.
+**Options révisées le 2026-08-16** :
+- A. OpenAI `gpt-4.1-mini-2025-04-14` (snapshot figé, adaptateur existant)
+- B. GPT-5.6 Terra (adaptation Responses API requise)
+- C. Gemini 3.6 Flash (nouvel adaptateur requis)
+**Décision : A** — OpenAI `gpt-4.1-mini-2025-04-14`.
+**Justification** : snapshot reproductible et compatible avec l'adaptateur du
+harness. Budget : 230 réponses pour A+B; 115 supplémentaires seulement si C
+est déclenché. `OPENAI_API_KEY` est absente de l'environnement au moment de la
+décision; aucun run payant n'est autorisé avant disponibilité et smoke test.
 
 ---
 
@@ -100,8 +110,18 @@
 - A. Session TI-360 existante (dérive connue, longueur contrôlée)
 - B. Brainstorming LocalContext (plus riche, multi-locuteurs)
 - C. Synthétique pur (contrôle total, moins réaliste)
-**Décision** : ⏳ **EN ATTENTE D1** — ARBITRE_FINAL choisit
-**Justification** : Doit contenir cas dérive documenté + tenir 1 appel LLM.
+**Décision : B** — fenêtres réelles anonymisées de `session_1.md` (segments
+103, 107–179, 181, 185–191) et `session_5.md` (3–18, 24–71, 74–100,
+104–161, 165–179, 181–219, 221–225), segmentées en 11 tours. Les synthèses
+dérivées sont exclues. Le manifeste exécutable exact est `SEGMENTS` dans
+`corpus/prepare_localcontext_source.py`.
+**Justification** : conversation réelle, révisions et désaccords, environ
+6 900 mots avant injection, compatible avec la fenêtre du modèle D2. Sélection
+confirmée par une relecture indépendante OpenCode le 2026-08-16.
+Le banc est explicitement hybride : les incidents gold sont des micro-dialogues
+contrôlés greffés dans deux conversations composites avec les tours réels. Il mesure la détection de classes
+connues dans un contexte réaliste, mais ne permet pas d'estimer leur fréquence
+naturelle ni de prétendre qu'ils sont survenus spontanément dans LocalContext.
 
 ---
 

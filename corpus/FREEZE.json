@@ -1,0 +1,18 @@
+{
+  "freeze_date": "2026-08-16",
+  "seed": 42,
+  "validator": "OpenCode, instance indépendante opencode_v03_audit",
+  "verdict": "GEL OUI",
+  "files": {
+    "corpus/source/corpus_source.json": "8d59604b91b86e9105155440362cecd5375b2db68d20b2d8e68ea5c319cb6a06",
+    "corpus/source/corpus_test.json": "781186469f7b7dd905c0c962d53d1de85eb1e61b759e6fd025fe5cd6e9b9740e",
+    "corpus/ground_truth/ground_truth.json": "241166653575eabdceaa774c18a84d529a2ae219f2814e870a4a4a679b618d46",
+    "corpus/d4_calibration_report.json": "81676fa597d09056d4b4240d9d909ab5ac11416ab6d029e38baa775ac4828896"
+  },
+  "d4": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "threshold": 0.36,
+    "pairs": 50,
+    "cross_review": "25 négatives déterministes relues et validées par OpenCode"
+  }
+}

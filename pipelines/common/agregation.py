@@ -75,7 +75,7 @@ class SemanticClusterer:
     def __init__(
         self,
         embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
-        similarity_threshold: float = 0.50,  # D4 — à valider Sprint 1
+        similarity_threshold: float = 0.36,  # D4 — calibration figée DEC-005
         batch_size: int = 32
     ):
         self.threshold = similarity_threshold

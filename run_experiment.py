@@ -237,7 +237,7 @@ def main():
     parser.add_argument("--cycles", type=int, default=5, help="Nombre de cycles (défaut: 5)")
     parser.add_argument("--pipelines", type=str, default=",".join(DEFAULT_PIPELINES),
                         help=f"Pipelines à exécuter (défaut: tous)")
-    parser.add_argument("--model", type=str, default="claude-3-5-sonnet-20241022",
+    parser.add_argument("--model", type=str, default="gpt-4.1-mini-2025-04-14",
                         help="Modèle unique (D2)")
     parser.add_argument("--provider", type=str, default="mock",
                         choices=["mock", "anthropic", "openai"],
@@ -301,7 +301,7 @@ def main():
         "temperature": 0.6,
         "n_rounds": 2,
         "n_cartographes": 2,
-        "similarity_threshold": 0.50,
+        "similarity_threshold": 0.36,
         "vote_threshold": 2/3,
         "total_cycles": args.cycles,
         "provider": args.provider,
