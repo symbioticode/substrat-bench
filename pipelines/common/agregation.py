@@ -4,12 +4,20 @@ Clustering par similarité sémantique + Dawid-Skene (Crowd-Kit) pour P3/P4.
 """
 
 import json
+import re
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+    from sklearn.metrics.pairwise import cosine_similarity
+except ImportError:  # Le mode mock/test reste exécutable sans la pile ML.
+    np = None
+    SentenceTransformer = None
+    cosine_similarity = None
+
+_SIMILARITY_MODEL = None
 
 # Crowd-Kit pour Dawid-Skene (installé via requirements.txt)
 try:
@@ -26,6 +34,7 @@ class Assertion:
     instance_id: str
     text: str
     source_ref: Dict[str, Any]  # {"session_id": "...", "tour_n": int}
+    epistemic_state: Optional[str] = None
     confidence: Optional[str] = None  # FORT/FAIBLE/PROBABLE (P3/P4 seulement)
     reasoning: Optional[str] = None
     
@@ -34,6 +43,7 @@ class Assertion:
             "instance_id": self.instance_id,
             "text": self.text,
             "source_ref": self.source_ref,
+            "epistemic_state": self.epistemic_state,
             "confidence": self.confidence,
             "reasoning": self.reasoning
         }
@@ -52,6 +62,7 @@ class ClusteredAssertion:
         return {
             "representative_text": self.representative_text,
             "source_ref": self.source_ref,
+            "epistemic_state": self.assertions[0].epistemic_state if self.assertions else None,
             "instance_count": self.instance_count,
             "avg_confidence": self.avg_confidence,
             "assertions": [a.to_dict() for a in self.assertions]
@@ -68,7 +79,7 @@ class SemanticClusterer:
         batch_size: int = 32
     ):
         self.threshold = similarity_threshold
-        self.model = SentenceTransformer(embedding_model)
+        self.model = SentenceTransformer(embedding_model) if SentenceTransformer else None
         self.batch_size = batch_size
     
     def cluster(
@@ -106,8 +117,12 @@ class SemanticClusterer:
             
             # Étape 2 : Similarité cosinus dans le groupe
             texts = [a.text for a in group]
-            embeddings = self.model.encode(texts, batch_size=self.batch_size, show_progress_bar=False)
-            sim_matrix = cosine_similarity(embeddings)
+            if self.model is None:
+                sim_matrix = [[1.0 if left.strip().casefold() == right.strip().casefold() else 0.0
+                               for right in texts] for left in texts]
+            else:
+                embeddings = self.model.encode(texts, batch_size=self.batch_size, show_progress_bar=False)
+                sim_matrix = cosine_similarity(embeddings)
             
             # Clustering agglomératif simple (seuil)
             visited = [False] * len(group)
@@ -119,7 +134,8 @@ class SemanticClusterer:
                 visited[i] = True
                 
                 for j in range(i + 1, len(group)):
-                    if not visited[j] and sim_matrix[i, j] >= self.threshold:
+                    similarity = sim_matrix[i][j] if np is None else sim_matrix[i, j]
+                    if not visited[j] and similarity >= self.threshold:
                         cluster_indices.append(j)
                         visited[j] = True
                 
@@ -127,9 +143,12 @@ class SemanticClusterer:
                 
                 # Texte représentatif = celui le plus central (moyenne sim max)
                 if len(cluster_indices) > 1:
-                    central_idx = cluster_indices[np.argmax([
-                        np.mean(sim_matrix[idx, cluster_indices]) for idx in cluster_indices
-                    ])]
+                    if np is None:
+                        central_idx = cluster_indices[0]
+                    else:
+                        central_idx = cluster_indices[np.argmax([
+                            np.mean(sim_matrix[idx, cluster_indices]) for idx in cluster_indices
+                        ])]
                     rep_text = group[central_idx].text
                 else:
                     rep_text = cluster_assertions[0].text
@@ -139,17 +158,36 @@ class SemanticClusterer:
                 avg_conf = None
                 if confidences:
                     conf_map = {"FAIBLE": 0.33, "PROBABLE": 0.66, "FORT": 1.0}
-                    avg_conf = np.mean([conf_map.get(c, 0.5) for c in confidences])
+                    values = [conf_map.get(c, 0.5) for c in confidences]
+                    avg_conf = float(np.mean(values)) if np is not None else sum(values) / len(values)
                 
                 clusters.append(ClusteredAssertion(
                     assertions=cluster_assertions,
                     representative_text=rep_text,
                     source_ref={"session_id": session_id, "tour_n": tour_n},
-                    instance_count=len(cluster_indices),
+                    # Plusieurs assertions proches d'un même lecteur ne sont
+                    # jamais plusieurs voix.
+                    instance_count=len({a.instance_id for a in cluster_assertions}),
                     avg_confidence=avg_conf
                 ))
         
         return clusters
+
+
+def text_similarity(left: str, right: str, allow_lexical_fallback: bool = True) -> float:
+    """Similarité D4 ; embeddings si disponibles, Jaccard lexical en mode léger."""
+    if SentenceTransformer is not None:
+        global _SIMILARITY_MODEL
+        if _SIMILARITY_MODEL is None:
+            _SIMILARITY_MODEL = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        embeddings = _SIMILARITY_MODEL.encode([left, right], show_progress_bar=False)
+        return float(cosine_similarity([embeddings[0]], [embeddings[1]])[0][0])
+    if not allow_lexical_fallback:
+        raise RuntimeError("Backend sémantique D4 indisponible; fallback lexical interdit pour un run réel")
+    left_tokens = set(re.findall(r"\w+", left.casefold()))
+    right_tokens = set(re.findall(r"\w+", right.casefold()))
+    union = left_tokens | right_tokens
+    return len(left_tokens & right_tokens) / len(union) if union else 0.0
 
 
 class DawidSkeneAggregator:

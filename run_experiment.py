@@ -21,6 +21,7 @@ from pipelines.pipeline_p2 import run_p2_cycle
 from pipelines.pipeline_p3 import run_p3_cycle
 from pipelines.pipeline_p4 import run_p4_cycle
 from metrics.metrics import run_all_metrics
+from pipelines.common.isolation import InferenceLedger
 
 PIPELINE_FUNCS = {
     "P0": run_p0_cycle,
@@ -43,7 +44,7 @@ class MockLLMClient:
                        temperature: float, **kwargs) -> Any:
         self.call_count += 1
         key = f"call_{self.call_count}"
-        content = self.responses.get(key, self._default_response())
+        content = self.responses.get(key, self._default_response(kwargs.get("seed")))
         
         class MockContent:
             def __init__(self, text): self.text = text
@@ -52,13 +53,17 @@ class MockLLMClient:
         
         return MockResponse(content)
     
-    def _default_response(self) -> str:
+    def _default_response(self, seed=None) -> str:
         # Réponse JSONL générique valide pour test
-        return '''{"text": "Assertion test", "dialogue_act": "Inform", "epistemic_state": "T", "source_ref": {"session_id": "s1", "tour_n": 1}, "reasoning": "Test"}'''
+        return json.dumps({"text": "Assertion test", "dialogue_act": "Inform", "epistemic_state": "T",
+                           "source_ref": {"session_id": "s1", "tour_n": 1},
+                           "reasoning": f"Mock déterministe seed={seed}"}, ensure_ascii=False)
 
 
 def load_corpus(corpus_path: Path) -> str:
     """Charge corpus de test (JSON ou texte)."""
+    if corpus_path.stat().st_size == 0:
+        raise ValueError(f"Corpus vide: {corpus_path}")
     if corpus_path.suffix == ".json":
         with open(corpus_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -83,10 +88,20 @@ def get_llm_client(model: str, provider: str = "mock") -> Any:
         return MockLLMClient()
     elif provider == "anthropic":
         from anthropic import Anthropic
-        return Anthropic()
+        sdk = Anthropic()
+        class AnthropicAdapter:
+            def create_message(self, model, messages, max_tokens, temperature, **kwargs):
+                return sdk.messages.create(model=model, messages=messages, max_tokens=max_tokens,
+                                           temperature=temperature, **kwargs)
+        return AnthropicAdapter()
     elif provider == "openai":
         from openai import OpenAI
-        return OpenAI()
+        sdk = OpenAI()
+        class OpenAIAdapter:
+            def create_message(self, model, messages, max_tokens, temperature, **kwargs):
+                return sdk.chat.completions.create(model=model, messages=messages, max_tokens=max_tokens,
+                                                   temperature=temperature, **kwargs)
+        return OpenAIAdapter()
     else:
         raise ValueError(f"Provider inconnu: {provider}")
 
@@ -99,6 +114,7 @@ def run_cycle(
     corpus_text: str,
     output_base: Path,
     seed: int = 42,
+    cycle_label: str = "A",
     **kwargs
 ) -> List[Dict[str, Any]]:
     """Exécute un cycle complet sur tous les pipelines demandés."""
@@ -107,7 +123,7 @@ def run_cycle(
     print(f"{'='*60}")
     
     cycle_results = []
-    corpus_path = output_base / f"cycle_{cycle_num}" / "corpus_test.json"
+    corpus_path = output_base / f"cycle_{cycle_label}_{cycle_num}" / "corpus_test.json"
     corpus_path.parent.mkdir(parents=True, exist_ok=True)
     corpus_path.write_text(corpus_text, encoding='utf-8')
     
@@ -119,6 +135,11 @@ def run_cycle(
         func = PIPELINE_FUNCS[pipeline_name]
         try:
             print(f"\n--- {pipeline_name} ---")
+            pipeline_kwargs = dict(kwargs)
+            if pipeline_name == "P2":
+                pipeline_kwargs["n_instances"] = 6
+            elif pipeline_name == "P1":
+                pipeline_kwargs["n_instances"] = 3
             result = func(
                 client=client,
                 model=model,
@@ -126,7 +147,8 @@ def run_cycle(
                 output_base=output_base,
                 cycle_num=cycle_num,
                 seed=seed + cycle_num * 1000,
-                **kwargs
+                cycle_label=cycle_label,
+                **pipeline_kwargs
             )
             result["timestamp"] = datetime.now(timezone.utc).isoformat()
             cycle_results.append(result)
@@ -196,12 +218,19 @@ def main():
                         help="Dossier sortie")
     parser.add_argument("--seed", type=int, default=42, help="Seed global")
     parser.add_argument("--skip-metrics", action="store_true", help="Ne pas calculer métriques")
+    parser.add_argument("--personas", choices=["off", "on", "both"], default="both",
+                        help="Cycles A, B ou les deux")
     
     args = parser.parse_args()
     
     pipelines = [p.strip().upper() for p in args.pipelines.split(",")]
     output_base = REPO_ROOT / args.output
     output_base.mkdir(parents=True, exist_ok=True)
+    ledger_path = output_base / "inference_ledger.jsonl"
+    if ledger_path.exists():
+        print(f"[ERROR] Registre déjà présent: {ledger_path}; utilisez un dossier --output neuf")
+        sys.exit(2)
+    ledger = InferenceLedger(ledger_path)
     
     # Chargement corpus
     corpus_path = REPO_ROOT / args.corpus
@@ -210,7 +239,11 @@ def main():
         print("Exécutez d'abord: python corpus/generate_corpus.py")
         sys.exit(1)
     
-    corpus_text = load_corpus(corpus_path)
+    try:
+        corpus_text = load_corpus(corpus_path)
+    except (ValueError, json.JSONDecodeError) as exc:
+        print(f"[ERROR] Corpus invalide: {exc}")
+        sys.exit(1)
     print(f"[INFO] Corpus chargé: {len(corpus_text)} chars")
     
     # Client LLM
@@ -221,18 +254,21 @@ def main():
     common_kwargs = {
         "max_tokens": 2000,
         "temperature": 0.6,
-        "n_instances": 3,
         "n_rounds": 2,
         "n_cartographes": 2,
         "similarity_threshold": 0.50,
         "vote_threshold": 2/3,
         "total_cycles": args.cycles,
+        "provider": args.provider,
+        "ledger": ledger,
     }
     
     all_results = []
     
     # Exécution cycles
-    for cycle in range(args.cycles):
+    cycle_labels = {"off": ["A"], "on": ["B"], "both": ["A", "B"]}[args.personas]
+    for cycle_label in cycle_labels:
+      for cycle in range(args.cycles):
         cycle_results = run_cycle(
             cycle_num=cycle,
             pipelines=pipelines,
@@ -241,12 +277,13 @@ def main():
             corpus_text=corpus_text,
             output_base=output_base,
             seed=args.seed,
+            cycle_label=cycle_label,
             **common_kwargs
         )
         all_results.extend(cycle_results)
         
         # Log intermédiaire
-        log_path = output_base / f"cycle_{cycle}" / "cycle_summary.json"
+        log_path = output_base / f"cycle_{cycle_label}_{cycle}" / "cycle_summary.json"
         log_path.write_text(json.dumps(cycle_results, ensure_ascii=False, indent=2), encoding='utf-8')
     
     # Métriques finales
@@ -256,15 +293,25 @@ def main():
         print(f"{'='*60}")
         
         gt_path = REPO_ROOT / "corpus/ground_truth/ground_truth.json"
-        if gt_path.exists():
-            run_all_metrics(output_base, gt_path, args.cycles)
+        if gt_path.exists() and gt_path.stat().st_size:
+            run_all_metrics(output_base, gt_path, args.cycles, tuple(cycle_labels))
             print(f"[OK] Métriques → {output_base}/metrics_report.json + summary.csv")
         else:
-            print(f"[WARN] Ground truth absent: {gt_path} — métriques partielles seulement")
+            print(f"[WARN] Ground truth absente ou vide: {gt_path} — métriques non calculées")
     
-    # Mise à jour HYPOTHESES.md
+    # Le mode mock est un gate technique et ne constitue pas une observation
+    # expérimentale à verser dans HYPOTHESES.md.
     hypotheses_path = REPO_ROOT / "HYPOTHESES.md"
-    update_hypotheses_log(all_results, hypotheses_path)
+    if args.provider != "mock":
+        update_hypotheses_log(all_results, hypotheses_path)
+
+    errors = [result for result in all_results if "error" in result]
+    if set(pipelines) == set(DEFAULT_PIPELINES) and not errors:
+        ledger_rows = sum(1 for _ in ledger_path.open(encoding="utf-8"))
+        expected = 23 * args.cycles * len(cycle_labels)
+        if ledger_rows != expected:
+            print(f"[ERROR] Registre incomplet: {ledger_rows} lignes, {expected} attendues")
+            sys.exit(3)
     
     # Résumé final
     print(f"\n{'='*60}")
@@ -278,6 +325,8 @@ def main():
     
     print(f"\nRésultats dans: {output_base}")
     print(f"Hypothèses log: {hypotheses_path}")
+    if errors:
+        sys.exit(4)
 
 
 if __name__ == "__main__":

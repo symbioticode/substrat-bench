@@ -1,16 +1,16 @@
 # STATUS.md — État du chantier (source de vérité)
 
-## Sprint courant : 0
-## Statut : PRÊT
-## Version : v0.1
-## Date MAJ : 2026-07-19
+## Sprint courant : préparation v0.3.0
+## Statut : HARNAIS_MOCK_VALIDÉ — EXPÉRIENCE_RÉELLE_BLOQUÉE
+## Version : v0.3.0
+## Date MAJ : 2026-08-16
 
 ### Blocage Sprint 0 (décisions D1-D4 §6 protocole)
 | Décision | Statut | Détail |
 |----------|--------|--------|
 | D1 Corpus source | ❌ BLOQUANT | Choisir session TI-360 vs LocalContext vs synthétique |
 | D2 Modèle unique + budget | ❌ BLOQUANT | Claude-3.5-Sonnet / GPT-4o / Local — clés API + budget |
-| D3 Traçabilité P4 Option B | ❌ BLOQUANT | Confirmer défaut ou choisir A/C |
+| D3 Traçabilité P4 Option B | ✅ ADOPTÉ PROVISOIRE | DEC-006, niveau fil round 2 |
 | D4 Seuil similarité | ⏳ Sprint 1 | Calibrer sur échantillon manuel 50 paires |
 
 ### Progression BR (brainstorm/)
@@ -26,9 +26,22 @@
 | BR-008 | Schéma sortie DiAML vs custom | PROPOSÉ | 3 |
 | BR-009 | M06/M07 ChatEval vs humain | PROPOSÉ | 4 |
 | BR-010 | Seuils pivot §0 | **ADOPTÉ** | 0 (figé R-PIVOT-01) |
+| BR-011 | Harnais contrôle Huang v0.3.0 | **ADOPTÉ** | préparation v0.3.0 |
+
+### État du harnais v0.3.0
+
+- P1 = débat synchronisé, 3 instances × 2 rounds, contact round 2 testé.
+- P2 = six lectures indépendantes réutilisées par P2@3/P2@4/P2@6.
+- Registre d'inférence : exactement 23 réponses par répétition complète.
+- M05 vectorielle, M09/M10 et comparaisons Question 0 générées.
+- Gate mock A/B : 46/46 lignes ; suite dédiée : 8/8 tests.
+- Les fichiers corpus et vérité terrain suivis sur `main` sont vides. Le contenu
+  non commité de l'ancien worktree n'est pas intégré implicitement.
 
 ### Prochaine action requise
-**ARBITRE_FINAL doit résoudre D1, D2, D3** avant que l'agent code ne puisse exécuter `generate_corpus.py` et lancer les pipelines.
+**ARBITRE_FINAL doit résoudre D1, D2 et valider D4**, puis intégrer un
+corpus/vérité terrain revus avant tout run LLM réel. Le harnais mock ne vaut
+pas résultat expérimental.
 
 ### Commandes de vérification
 ```bash
@@ -43,7 +56,8 @@ pytest pipelines/common/isolation.py::test_isolation_assertion -v
 pytest pipelines/common/isolation.py::test_debate_context_injection -v
 
 # Expérience complète (après Sprint 3)
-python run_experiment.py --cycles 5
+python run_experiment.py --cycles 5 --personas both --provider mock \
+  --corpus /chemin/vers/corpus_valide.json --output results/mock-gate
 ```
 
 ### Gates Sprint (GNG-PAPER adapté ETAU/SECS)

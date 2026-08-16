@@ -86,8 +86,10 @@ La spécification normative complète est
 
 ## État des preuves
 
-Le dépôt contient un harnais reproductible, un corpus incidenté, une vérité
-terrain séparée des agents lecteurs et des exécutions mock. La branche
+Le dépôt contient désormais le harnais v0.3.0 validé en mode mock. Sur la
+branche principale issue du merge v0.3.0, les fichiers suivis du corpus et de
+la vérité terrain sont encore des placeholders vides : ils doivent être revus
+et intégrés avant toute expérience réelle. La branche
 [`codex/omniroute-autonome-20260810`](https://github.com/symbioticode/substrat-bench/tree/codex/omniroute-autonome-20260810)
 ajoute deux pilotes P0 réels :
 
@@ -108,14 +110,16 @@ Avec Nix :
 
 ```bash
 nix-shell
-python run_experiment.py --cycles 1 --provider mock
+python run_experiment.py --cycles 1 --personas both --provider mock \
+  --corpus /chemin/vers/corpus_valide.json --output results/mock-$(date +%s)
 ```
 
 Avec un environnement Python existant :
 
 ```bash
 python -m pip install -r requirements.txt
-python run_experiment.py --cycles 1 --provider mock
+python run_experiment.py --cycles 1 --personas both --provider mock \
+  --corpus /chemin/vers/corpus_valide.json --output results/mock-$(date +%s)
 ```
 
 Vérifications légères :
@@ -124,6 +128,11 @@ Vérifications légères :
 PYTHONPATH=. pytest -q
 python scripts/lab_check.py
 ```
+
+Chaque dossier `--output` doit être neuf : le registre d'inférence est
+append-only et le harnais refuse d'écraser un `inference_ledger.jsonl`
+existant. Une répétition complète produit exactement 23 lignes ; le plan A/B
+en produit 46.
 
 Consulter avant toute expérience réelle :
 

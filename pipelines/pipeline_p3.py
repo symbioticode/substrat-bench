@@ -5,11 +5,12 @@ Traçabilité niveau fil (Option B par défaut D3)
 """
 
 import json
+import secrets
 from pathlib import Path
 from typing import List, Dict, Any
 from dataclasses import dataclass
 
-from pipelines.common.isolation import isolated_call, IsolationConfig, make_arbiter_call, validate_isolation
+from pipelines.common.isolation import isolated_call, IsolationConfig, make_arbiter_call, CallMetadata
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
@@ -34,9 +35,12 @@ def run_p3_parseurs(
     max_tokens: int = 2000,
     temperature: float = 0.6,
     cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
 ) -> List[ParseurOutput]:
     """N parseurs isolés — sortie structurée (PAS de confidence)."""
-    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
+    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature, provider=provider)
     
     parseurs = []
     for i in range(n_parseurs):
@@ -48,7 +52,12 @@ def run_p3_parseurs(
         else:
             prompt = get_prompt("P3_parseur", corpus_text=corpus_text)
         
-        raw = isolated_call(client, config, prompt, corpus_text)
+        call_seed = seed * 1000 + i
+        raw = isolated_call(
+            client, config, prompt, "",
+            metadata=CallMetadata("P3", cycle_label, cycle_num, "parser", 1, i + 1, call_seed),
+            ledger=ledger,
+        )
         
         # Parse JSONL → ParseurOutput
         parseur = ParseurOutput.from_jsonl(raw, parseur_id=parseur_id)
@@ -64,26 +73,36 @@ def run_p3_arbitre(
     parseur_outputs: List[ParseurOutput],
     seed: int = 42,
     max_tokens: int = 2000,
-    temperature: float = 0.6
+    temperature: float = 0.6,
+    cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
+    reader_order=None,
 ) -> ArbitreOutput:
-    """Arbitre unique — reçoit SEULEMENT sorties parseurs, PAS corpus."""
-    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
+    """Arbitre unique — sorties anonymisées quant à la persona, PAS corpus."""
+    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature, provider=provider)
     
     # Sérialiser sorties parseurs
-    parser_outputs = []
-    for p in parseur_outputs:
-        for a in p.assertions:
-            d = a.to_dict()
-            d["parseur_id"] = p.parseur_id
-            parser_outputs.append(d)
+    ordered = reader_order or list(range(len(parseur_outputs)))
+    parser_outputs = [
+        {"reader": f"reader_{anonymous_index}",
+         "assertions": [{k: v for k, v in a.to_dict().items() if k not in {"parseur_id", "timestamp"}}
+                        for a in parseur_outputs[source_index].assertions]}
+        for anonymous_index, source_index in enumerate(ordered)
+    ]
     
     prompt = get_prompt("P3_arbitre",
         n_parseurs=len(parseur_outputs),
-        parser_outputs=json.dumps(parser_outputs, ensure_ascii=False, indent=2)
+        parser_outputs=""
     )
     
     # Appel arbitre SANS corpus
-    raw = make_arbiter_call(client, config, prompt, parser_outputs)
+    raw = make_arbiter_call(
+        client, config, prompt, parser_outputs,
+        metadata=CallMetadata("P3", cycle_label, cycle_num, "arbiter", 2, 4, seed * 1000 + 3),
+        ledger=ledger,
+    )
     
     # Parse arbitre output
     assertions = []
@@ -145,7 +164,8 @@ def run_p3(
         client, model, corpus_text,
         n_parseurs=n_parseurs, seed=seed,
         max_tokens=max_tokens, temperature=temperature,
-        cycle_label=cycle_label
+        cycle_label=cycle_label, cycle_num=cycle_num,
+        provider=kwargs.get("provider", "unknown"), ledger=kwargs.get("ledger"),
     )
     
     for p in parseur_outputs:
@@ -154,9 +174,17 @@ def run_p3(
         )
     
     # Arbitre (SANS persona - reçoit seulement sorties parseurs)
+    reader_order = secrets.SystemRandom().sample(range(len(parseur_outputs)), len(parseur_outputs))
+    (output_dir / f"p3_anonymization_cycle{cycle_num}.json").write_text(
+        json.dumps({"anonymous_reader_order": [parseur_outputs[i].parseur_id for i in reader_order]}, indent=2),
+        encoding="utf-8",
+    )
     arbiter_output = run_p3_arbitre(
         client, model, parseur_outputs,
-        seed=seed, max_tokens=max_tokens, temperature=temperature
+        seed=seed, max_tokens=max_tokens, temperature=temperature,
+        cycle_label=cycle_label, cycle_num=cycle_num,
+        provider=kwargs.get("provider", "unknown"), ledger=kwargs.get("ledger"),
+        reader_order=reader_order,
     )
     
     (output_dir / f"p3_arbitre_cycle{cycle_num}.jsonl").write_text(

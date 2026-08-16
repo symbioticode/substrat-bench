@@ -11,7 +11,7 @@ from typing import List, Dict, Any
 from dataclasses import dataclass, field
 
 from pipelines.common.isolation import (
-    isolated_call, IsolationConfig, 
+    isolated_call, IsolationConfig, CallMetadata,
     build_debate_round_messages, validate_isolation
 )
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
@@ -80,6 +80,9 @@ def run_p1_debate(
     max_tokens: int = 2000,
     temperature: float = 0.6,
     cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
     **kwargs
 ) -> List[P1InstanceTrace]:
     """
@@ -93,21 +96,22 @@ def run_p1_debate(
     config = IsolationConfig(
         model=model,
         max_tokens=max_tokens,
-        temperature=temperature
+        temperature=temperature,
+        provider=provider,
     )
     
     # Stockage sorties par round pour injection round suivant
     all_outputs_by_round = {}  # round_num -> {instance_id: raw_output}
-    traces = []
-    
-    for inst_idx in range(n_instances):
-        instance_id = f"p1_instance_{inst_idx}"
-        instance_seed = seed * 1000 + inst_idx
-        instance_rounds = []
-        
-        own_previous = None
-        
-        for round_num in range(1, n_rounds + 1):
+    rounds_by_instance = {f"p1_instance_{i}": [] for i in range(n_instances)}
+
+    # Ordonnancement par round : aucun agent ne commence N+1 avant que tous
+    # les agents aient clos N. C'est la condition qui rend le contact réel.
+    for round_num in range(1, n_rounds + 1):
+        current_round = {}
+        for inst_idx in range(n_instances):
+            instance_id = f"p1_instance_{inst_idx}"
+            instance_seed = seed * 1000 + (round_num - 1) * n_instances + inst_idx
+            own_previous = all_outputs_by_round.get(round_num - 1, {}).get(instance_id, "")
             if round_num == 1:
                 # Round 1 : isolation stricte — injection persona si Cycle B
                 if cycle_label == "B":
@@ -125,17 +129,23 @@ def run_p1_debate(
                 validate_isolation(messages)
             else:
                 # Round N>1 : injection sorties autres instances
+                previous_round = all_outputs_by_round[round_num - 1]
                 other_outputs = [
-                    all_outputs_by_round[round_num - 1][other_id]
-                    for other_id in all_outputs_by_round[round_num - 1]
+                    previous_round[other_id]
+                    for other_id in previous_round
                     if other_id != instance_id
                 ]
+                assert len(other_outputs) == n_instances - 1, "Débat incomplet : sorties concurrentes manquantes"
                 
-                prompt = get_prompt("P1_roundN", 
-                    corpus_text=corpus_text,
-                    own_previous_output=own_previous,
-                    other_outputs=other_outputs
-                )
+                prompt_kwargs = {
+                    "corpus_text": corpus_text,
+                    "own_previous_output": own_previous,
+                    "other_outputs": other_outputs,
+                }
+                if cycle_label == "B":
+                    prompt = get_prompt_with_persona("P1_roundN", instance_id=instance_id, **prompt_kwargs)
+                else:
+                    prompt = get_prompt("P1_roundN", **prompt_kwargs)
                 messages = build_debate_round_messages(
                     prompt_fixe=prompt,
                     corpus_text="",
@@ -150,18 +160,19 @@ def run_p1_debate(
                     assert other_out[:50] in content, f"Sortie autre instance manquante dans round {round_num}"
             
             # Appel LLM isolé
-            raw_output = isolated_call(client, config, messages[0]["content"], "")
+            raw_output = isolated_call(
+                client, config, messages[0]["content"], "",
+                metadata=CallMetadata("P1", cycle_label, cycle_num, "debater", round_num,
+                                      (round_num - 1) * n_instances + inst_idx + 1, instance_seed),
+                ledger=ledger,
+            )
             
             # Sauvegarde pour round suivant
-            if round_num not in all_outputs_by_round:
-                all_outputs_by_round[round_num] = {}
-            all_outputs_by_round[round_num][instance_id] = raw_output
+            current_round[instance_id] = raw_output
             
             # Parse
             assertions = parse_structured_output(raw_output, instance_id)
-            own_previous = raw_output
-            
-            instance_rounds.append(P1InstanceRound(
+            rounds_by_instance[instance_id].append(P1InstanceRound(
                 instance_id=instance_id,
                 round_num=round_num,
                 raw_output=raw_output,
@@ -170,9 +181,9 @@ def run_p1_debate(
             
             print(f"[P1] {instance_id} Round {round_num}: {len(assertions)} assertions")
         
-        traces.append(P1InstanceTrace(instance_id=instance_id, rounds=instance_rounds))
-    
-    return traces
+        all_outputs_by_round[round_num] = current_round
+
+    return [P1InstanceTrace(instance_id=k, rounds=v) for k, v in rounds_by_instance.items()]
 
 
 def aggregate_p1_final(
@@ -193,6 +204,7 @@ def aggregate_p1_final(
                 instance_id=trace.instance_id,
                 text=a.text,
                 source_ref={"session_id": a.source_ref.session_id, "tour_n": a.source_ref.tour_n},
+                epistemic_state=a.epistemic_state.value,
                 confidence=None,
                 reasoning=None
             ))
@@ -256,7 +268,10 @@ def run_p1_cycle(
         n_instances=n_instances, n_rounds=n_rounds, seed=seed + cycle_num * 1000,
         max_tokens=kwargs.get('max_tokens', 2000),
         temperature=kwargs.get('temperature', 0.6),
-        cycle_label=cycle_label
+        cycle_label=cycle_label,
+        provider=kwargs.get("provider", "unknown"),
+        ledger=kwargs.get("ledger"),
+        cycle_num=cycle_num,
     )
     
     result = aggregate_p1_final(traces, similarity_threshold, vote_threshold)

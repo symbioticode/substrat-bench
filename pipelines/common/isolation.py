@@ -7,6 +7,11 @@ Vérifiable par lecture de code + test automatisé Sprint 1/2.
 from typing import Any, Dict, List, Optional, Protocol
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from hashlib import sha256
+from pathlib import Path
+import json
+import time
 
 
 class LLMClient(Protocol):
@@ -31,6 +36,106 @@ class IsolationConfig:
     max_tokens: int = 2000
     temperature: float = 0.6
     system_prompt: Optional[str] = None  # Si None, pas de message system
+    provider: str = "unknown"
+
+
+@dataclass(frozen=True)
+class CallMetadata:
+    """Identité expérimentale obligatoire d'une réponse LLM."""
+    pipeline: str
+    cycle: str
+    repetition: int
+    role: str
+    round_num: int
+    response_index: int
+    seed: Optional[int]
+
+
+class InferenceLedger:
+    """Registre JSONL append-only, une ligne par réponse LLM terminée."""
+
+    def __init__(self, path: Path):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+
+    def append(self, entry: Dict[str, Any]) -> None:
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def _usage_value(response: Any, *names: str) -> Optional[int]:
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return None
+    for name in names:
+        value = getattr(usage, name, None)
+        if value is None and isinstance(usage, dict):
+            value = usage.get(name)
+        if value is not None:
+            return int(value)
+    return None
+
+
+def _response_text(response: Any) -> str:
+    if hasattr(response, 'content') and response.content:
+        return response.content[0].text if hasattr(response.content[0], 'text') else str(response.content[0])
+    if hasattr(response, 'choices') and response.choices:
+        return response.choices[0].message.content
+    return str(response)
+
+
+def _execute_call(
+    client: LLMClient,
+    config: IsolationConfig,
+    content: str,
+    metadata: Optional[CallMetadata],
+    ledger: Optional[InferenceLedger],
+    **extra_kwargs: Any,
+) -> str:
+    messages = [{"role": "user", "content": content}]
+    validate_isolation(messages)
+    call_kwargs = dict(extra_kwargs)
+    # Anthropic ne fournit pas de paramètre seed. Une absence de contrôle est
+    # consignée comme null au lieu d'être présentée comme reproductible.
+    effective_seed = metadata.seed if metadata else None
+    if effective_seed is not None and config.provider in {"mock", "openai"}:
+        call_kwargs["seed"] = effective_seed
+    elif config.provider not in {"mock", "openai"}:
+        effective_seed = None
+
+    started = time.perf_counter()
+    response = client.create_message(
+        model=config.model,
+        messages=messages,
+        max_tokens=config.max_tokens,
+        temperature=config.temperature,
+        **call_kwargs,
+    )
+    wall_time_ms = round((time.perf_counter() - started) * 1000, 3)
+    text = _response_text(response)
+
+    if ledger is not None:
+        if metadata is None:
+            raise ValueError("CallMetadata obligatoire lorsqu'un registre est actif")
+        ledger.append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "pipeline": metadata.pipeline,
+            "cycle": metadata.cycle,
+            "repetition": metadata.repetition,
+            "role": metadata.role,
+            "round": metadata.round_num,
+            "response_index": metadata.response_index,
+            "seed": effective_seed,
+            "seed_requested": metadata.seed,
+            "model": config.model,
+            "provider": config.provider,
+            "prompt_sha256": sha256(content.encode("utf-8")).hexdigest(),
+            "input_tokens": _usage_value(response, "input_tokens", "prompt_tokens"),
+            "output_tokens": _usage_value(response, "output_tokens", "completion_tokens"),
+            "wall_time_ms": wall_time_ms,
+            "estimated_cost_usd": None,
+        })
+    return text
 
 
 def build_isolated_messages(prompt_fixe: str, corpus_text: str) -> List[Dict[str, str]]:
@@ -62,6 +167,8 @@ def isolated_call(
     config: IsolationConfig,
     prompt_fixe: str,
     corpus_text: str,
+    metadata: Optional[CallMetadata] = None,
+    ledger: Optional[InferenceLedger] = None,
     **extra_kwargs: Any
 ) -> str:
     """
@@ -77,21 +184,7 @@ def isolated_call(
     messages = build_isolated_messages(prompt_fixe, corpus_text)
     validate_isolation(messages)
     
-    response = client.create_message(
-        model=config.model,
-        messages=messages,
-        max_tokens=config.max_tokens,
-        temperature=config.temperature,
-        **extra_kwargs
-    )
-    
-    # Extraction standardisée du texte (adapter selon client)
-    if hasattr(response, 'content') and response.content:
-        return response.content[0].text if hasattr(response.content[0], 'text') else str(response.content[0])
-    elif hasattr(response, 'choices') and response.choices:
-        return response.choices[0].message.content
-    else:
-        return str(response)
+    return _execute_call(client, config, messages[0]["content"], metadata, ledger, **extra_kwargs)
 
 
 class ArbiterInterface(Protocol):
@@ -127,6 +220,8 @@ def make_arbiter_call(
     config: IsolationConfig,
     prompt_arbitrage: str,
     sorties_precedentes: List[Dict[str, Any]],
+    metadata: Optional[CallMetadata] = None,
+    ledger: Optional[InferenceLedger] = None,
     **kwargs: Any
 ) -> str:
     """
@@ -142,20 +237,7 @@ def make_arbiter_call(
     messages = [{"role": "user", "content": content}]
     validate_isolation(messages)  # Même validation : 1 message user seulement
     
-    response = client.create_message(
-        model=config.model,
-        messages=messages,
-        max_tokens=config.max_tokens,
-        temperature=config.temperature,
-        **kwargs
-    )
-    
-    if hasattr(response, 'content') and response.content:
-        return response.content[0].text if hasattr(response.content[0], 'text') else str(response.content[0])
-    elif hasattr(response, 'choices') and response.choices:
-        return response.choices[0].message.content
-    else:
-        return str(response)
+    return _execute_call(client, config, content, metadata, ledger, **kwargs)
 
 
 # === Test d'isolation pour Sprint 1 (P0/P1/P2) ===

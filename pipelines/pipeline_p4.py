@@ -6,12 +6,13 @@ Traçabilité Option B (niveau fil, round 2) — D3 par défaut
 """
 
 import json
+import secrets
 from pathlib import Path
 from typing import List, Dict, Any
 from dataclasses import dataclass
 
 from pipelines.common.isolation import (
-    isolated_call, IsolationConfig, make_arbiter_call, validate_isolation
+    isolated_call, IsolationConfig, make_arbiter_call, CallMetadata
 )
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
@@ -70,13 +71,16 @@ def run_p4_parseurs(
     max_tokens: int = 2000,
     temperature: float = 0.6,
     cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
 ) -> List[ParseurOutput]:
     """
     Étage 1 : N parseurs isolés — lisent CHACUN l'intégralité du corpus.
     (Adaptation banc d'essai : partitionnement réel impossible pour convergence measure)
     Injection persona si Cycle B.
     """
-    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
+    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature, provider=provider)
     
     parseurs = []
     for i in range(n_parseurs):
@@ -88,7 +92,11 @@ def run_p4_parseurs(
         else:
             prompt = get_prompt("P4_parser", corpus_text=corpus_text)
         
-        raw = isolated_call(client, config, prompt, corpus_text)
+        raw = isolated_call(
+            client, config, prompt, "",
+            metadata=CallMetadata("P4", cycle_label, cycle_num, "parser", 1, i + 1, seed * 1000 + i),
+            ledger=ledger,
+        )
         output = parse_parseur_output(raw, parseur_id)
         parseurs.append(output)
         print(f"[P4 Parseurs] {parseur_id}: {len(output.assertions)} assertions")
@@ -103,23 +111,29 @@ def run_p4_cartographes(
     n_cartographes: int = 2,
     seed: int = 42,
     max_tokens: int = 2000,
-    temperature: float = 0.6
+    temperature: float = 0.6,
+    cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
+    reader_order=None,
 ) -> List[Dict[str, Any]]:
     """
-    Étage 2 : M cartographes isolés.
+    Étage 2 : M cartographes isolés, entrées anonymisées quant à la persona.
     Reçoivent SEULEMENT sorties parseurs — JAMAIS corpus (§2bis).
     Produisent cartes de cohérence (clusters, liens inter-sessions, zones non-convergence).
     """
-    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
+    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature, provider=provider)
     
     # Sérialiser sorties parseurs
     import json
-    parser_outputs = []
-    for p in parseur_outputs:
-        for a in p.assertions:
-            d = a.to_dict()
-            d["parseur_id"] = p.parseur_id
-            parser_outputs.append(d)
+    ordered = reader_order or list(range(len(parseur_outputs)))
+    parser_outputs = [
+        {"reader": f"reader_{anonymous_index}",
+         "assertions": [{k: v for k, v in a.to_dict().items() if k not in {"parseur_id", "timestamp"}}
+                        for a in parseur_outputs[source_index].assertions]}
+        for anonymous_index, source_index in enumerate(ordered)
+    ]
     
     cartographes = []
     for i in range(n_cartographes):
@@ -127,13 +141,17 @@ def run_p4_cartographes(
         
         prompt = get_prompt("P4_cartographe",
             n_parseurs=len(parseur_outputs),
-            parser_outputs=json.dumps(parser_outputs, ensure_ascii=False, indent=2),
+            parser_outputs="",
             total_rounds=2,
             previous_cartographe_output=""
         )
         
         # Appel isolé sans corpus
-        raw = make_arbiter_call(client, config, prompt, parser_outputs)
+        raw = make_arbiter_call(
+            client, config, prompt, parser_outputs,
+            metadata=CallMetadata("P4", cycle_label, cycle_num, "cartographer", 2, 4 + i, seed * 1000 + 3 + i),
+            ledger=ledger,
+        )
         
         # Parse cartographe output
         try:
@@ -161,22 +179,30 @@ def run_p4_nucleus(
     cartographe_outputs: List[Dict[str, Any]],
     seed: int = 42,
     max_tokens: int = 2000,
-    temperature: float = 0.6
+    temperature: float = 0.6,
+    cycle_label: str = "A",
+    cycle_num: int = 0,
+    provider: str = "unknown",
+    ledger=None,
 ) -> Dict[str, Any]:
     """
     Étage 3 : Noyau de cohérence unique.
     Reçoit SEULEMENT sorties cartographes — JAMAIS corpus.
     Produit synthèse finale avec confiance 3 niveaux (FORT/PROBABLE/FAIBLE).
     """
-    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature)
+    config = IsolationConfig(model=model, max_tokens=max_tokens, temperature=temperature, provider=provider)
     
     import json
     prompt = get_prompt("P4_noyau",
         n_cartographes=len(cartographe_outputs),
-        cartographe_outputs=json.dumps(cartographe_outputs, ensure_ascii=False, indent=2)
+        cartographe_outputs=""
     )
     
-    raw = make_arbiter_call(client, config, prompt, cartographe_outputs)
+    raw = make_arbiter_call(
+        client, config, prompt, cartographe_outputs,
+        metadata=CallMetadata("P4", cycle_label, cycle_num, "nucleus", 3, 6, seed * 1000 + 5),
+        ledger=ledger,
+    )
     
     # Parse nucleus output (JSONL assertions + non_convergence)
     assertions = []
@@ -239,7 +265,8 @@ def run_p4(
         client, model, corpus_text,
         n_parseurs=n_parseurs, seed=seed,
         max_tokens=max_tokens, temperature=temperature,
-        cycle_label=cycle_label
+        cycle_label=cycle_label, cycle_num=cycle_num,
+        provider=kwargs.get("provider", "unknown"), ledger=kwargs.get("ledger"),
     )
     
     for p in parseur_outputs:
@@ -248,10 +275,18 @@ def run_p4(
         )
     
     # Étage 2 : Cartographes
+    reader_order = secrets.SystemRandom().sample(range(len(parseur_outputs)), len(parseur_outputs))
+    (output_dir / f"p4_anonymization_cycle{cycle_num}.json").write_text(
+        json.dumps({"anonymous_reader_order": [parseur_outputs[i].parseur_id for i in reader_order]}, indent=2),
+        encoding="utf-8",
+    )
     cartographe_outputs = run_p4_cartographes(
         client, model, parseur_outputs,
         n_cartographes=n_cartographes, seed=seed,
-        max_tokens=max_tokens, temperature=temperature
+        max_tokens=max_tokens, temperature=temperature,
+        cycle_label=cycle_label, cycle_num=cycle_num,
+        provider=kwargs.get("provider", "unknown"), ledger=kwargs.get("ledger"),
+        reader_order=reader_order,
     )
     
     for c in cartographe_outputs:
@@ -262,7 +297,9 @@ def run_p4(
     # Étage 3 : Noyau
     nucleus_result = run_p4_nucleus(
         client, model, cartographe_outputs,
-        seed=seed, max_tokens=max_tokens, temperature=temperature
+        seed=seed, max_tokens=max_tokens, temperature=temperature,
+        cycle_label=cycle_label, cycle_num=cycle_num,
+        provider=kwargs.get("provider", "unknown"), ledger=kwargs.get("ledger"),
     )
     
     (output_dir / f"p4_nucleus_cycle{cycle_num}.jsonl").write_text(
