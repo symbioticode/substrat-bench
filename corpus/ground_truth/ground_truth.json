@@ -1,0 +1,317 @@
+{
+  "seed": 42,
+  "incidents": [
+    {
+      "incident_id": "INC-01",
+      "type": "NON_ETAYE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 26
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 27
+      },
+      "description_courte": "élimination complète des erreurs annoncée sans test"
+    },
+    {
+      "incident_id": "INC-02",
+      "type": "NON_ETAYE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 9
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 10
+      },
+      "description_courte": "doublement du marché annoncé sans projection vérifiable"
+    },
+    {
+      "incident_id": "INC-03",
+      "type": "NON_ETAYE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 10
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 11
+      },
+      "description_courte": "réduction de coûts de 40 % annoncée sans mesure ni source"
+    },
+    {
+      "incident_id": "INC-04",
+      "type": "NON_ETAYE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 2
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 3
+      },
+      "description_courte": "préférence universelle annoncée sans enquête"
+    },
+    {
+      "incident_id": "INC-05",
+      "type": "CONTRADICTION_INTER",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 1
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 1
+      },
+      "description_courte": "deux instances donnent des fréquences de source incompatibles"
+    },
+    {
+      "incident_id": "INC-06",
+      "type": "CONTRADICTION_INTER",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 28
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 7
+      },
+      "description_courte": "deux sessions définissent des populations cibles incompatibles"
+    },
+    {
+      "incident_id": "INC-07",
+      "type": "CONTRADICTION_INTER",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 28
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 7
+      },
+      "description_courte": "deux sessions prescrivent des règles de consentement incompatibles"
+    },
+    {
+      "incident_id": "INC-08",
+      "type": "CONTRADICTION_INTER",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 16
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 17
+      },
+      "description_courte": "deux instances donnent des budgets maximaux incompatibles"
+    },
+    {
+      "incident_id": "INC-09",
+      "type": "DERIVE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 15
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 16
+      },
+      "description_courte": "hypothèse provisoire de taux de réponse transformée en fait"
+    },
+    {
+      "incident_id": "INC-10",
+      "type": "DERIVE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 5
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 6
+      },
+      "description_courte": "vérification juridique ouverte transformée en conformité acquise"
+    },
+    {
+      "incident_id": "INC-11",
+      "type": "DERIVE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 19
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 20
+      },
+      "description_courte": "hypothèse de démarrage en septembre transformée en fait confirmé"
+    },
+    {
+      "incident_id": "INC-12",
+      "type": "DERIVE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 25
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 26
+      },
+      "description_courte": "possibilité de réduction de charge transformée en certitude"
+    },
+    {
+      "incident_id": "INC-13",
+      "type": "LACUNE_SILENCIEUSE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 21
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 22
+      },
+      "description_courte": "détection des sources obsolètes soulevée puis abandonnée"
+    },
+    {
+      "incident_id": "INC-14",
+      "type": "LACUNE_SILENCIEUSE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 23
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 24
+      },
+      "description_courte": "retour arrière fournisseur soulevé puis non résolu"
+    },
+    {
+      "incident_id": "INC-15",
+      "type": "LACUNE_SILENCIEUSE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 4
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 5
+      },
+      "description_courte": "contestation d'une donnée incorrecte soulevée puis ignorée"
+    },
+    {
+      "incident_id": "INC-16",
+      "type": "LACUNE_SILENCIEUSE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 30
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 31
+      },
+      "description_courte": "responsabilité en cas de perte soulevée puis laissée sans réponse"
+    },
+    {
+      "incident_id": "INC-17",
+      "type": "CONTRADICTION_INTRA",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 8
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 9
+      },
+      "description_courte": "absence de données personnelles contredite par une conservation nominative"
+    },
+    {
+      "incident_id": "INC-18",
+      "type": "CONTRADICTION_INTRA",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 18
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 19
+      },
+      "description_courte": "absence de décision automatique contredite par une priorisation autonome"
+    },
+    {
+      "incident_id": "INC-19",
+      "type": "CONTRADICTION_INTRA",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 23
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 24
+      },
+      "description_courte": "fréquence du rapport annoncée mensuelle puis hebdomadaire"
+    },
+    {
+      "incident_id": "INC-20",
+      "type": "CONTRADICTION_INTRA",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 20
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 21
+      },
+      "description_courte": "durée du pilote annoncée à six puis douze semaines"
+    },
+    {
+      "incident_id": "INC-21",
+      "type": "AMBIGU_GENUINE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 13
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 14
+      },
+      "description_courte": "actif désigne légitimement démarrage ou fonctionnement correct"
+    },
+    {
+      "incident_id": "INC-22",
+      "type": "AMBIGU_GENUINE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 11
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 12
+      },
+      "description_courte": "source récente a deux lectures légitimes non tranchées"
+    },
+    {
+      "incident_id": "INC-23",
+      "type": "AMBIGU_GENUINE",
+      "source_ref_origine": {
+        "session_id": "session_001",
+        "tour_n": 2
+      },
+      "source_ref_reprise": {
+        "session_id": "session_001",
+        "tour_n": 3
+      },
+      "description_courte": "client désigne légitimement l'entreprise ou son représentant"
+    },
+    {
+      "incident_id": "INC-24",
+      "type": "AMBIGU_GENUINE",
+      "source_ref_origine": {
+        "session_id": "session_002",
+        "tour_n": 14
+      },
+      "source_ref_reprise": {
+        "session_id": "session_002",
+        "tour_n": 15
+      },
+      "description_courte": "réussite évaluée légitimement par argent ou temps sans arbitrage"
+    }
+  ]
+}

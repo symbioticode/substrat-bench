@@ -83,7 +83,7 @@ def check_d3():
         "D3 : aucune option tranchée"
 
 
-@check("D1-D4", "D4 Seuil similarité — décision tranchée (défaut 0.50 validé Sprint 1)")
+@check("D1-D4", "D4 Seuil similarité — calibration exécutée et décision figée")
 def check_d4():
     """Vérifie DECISIONS.md contient une valeur réelle pour D4 (§6)."""
     content = (REPO_ROOT / "DECISIONS.md").read_text()
@@ -91,6 +91,7 @@ def check_d4():
     assert dec_block, "Bloc DEC-005 (D4) non trouvé"
     dec_text = dec_block.group(0)
     assert "EN ATTENTE" not in dec_text, "D4 : décision en attente"
+    assert "CALIBRATION_PENDING" not in dec_text, "D4 : calibration choisie mais non exécutée"
     assert any(m in dec_text for m in ["Décision : A", "Décision : B", "Décision : C"]), \
         "D4 : aucune option tranchée"
 
@@ -193,19 +194,15 @@ def check_personas_off():
             f"Contenu persona Cartographe dans {key} Cycle A"
 
 
-@check("Sprint 1", "Seuil similarité D4 fixé et justifié (0.50 par défaut, variable D4)")
+@check("Sprint 1", "Seuil similarité D4 fixé et justifié par le rapport de calibration")
 def check_d4_threshold():
-    """§7 Sprint 1 : D4 fixé et justifié."""
-    # Variable dans VARIABLES.md ou agregation.py
-    var_path = REPO_ROOT / "VARIABLES.md"
-    agg_path = REPO_ROOT / "pipelines" / "common" / "agregation.py"
-    found = False
-    for path in [var_path, agg_path]:
-        if path.exists():
-            content = path.read_text()
-            if "0.50" in content or "similarity_threshold" in content:
-                found = True
-    assert found, "Seuil D4 (0.50 ou variable similarity_threshold) non trouvé"
+    """§7 Sprint 1 : D4 fixé par 50 paires et le modèle exact."""
+    report_path = REPO_ROOT / "corpus" / "d4_calibration_report.json"
+    assert report_path.exists() and report_path.stat().st_size, "Rapport D4 absent"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report.get("pairs") == 50, "D4 doit reposer sur exactement 50 paires"
+    assert report.get("model") == "sentence-transformers/all-MiniLM-L6-v2"
+    assert "best" in report and "threshold" in report["best"]
 
 
 # ========================

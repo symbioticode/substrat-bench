@@ -1,0 +1,320 @@
+{
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "pairs": 50,
+  "positive": 25,
+  "negative": 25,
+  "dataset_sha256": "369cbee32b9f48742b2e99f064bad70c535ace5fc82cf3a63f2064814f0fd580",
+  "selection": "max F1; tie precision puis seuil",
+  "best": {
+    "threshold": 0.36,
+    "tp": 23,
+    "fp": 7,
+    "tn": 18,
+    "fn": 2,
+    "precision": 0.7666666666666667,
+    "recall": 0.92,
+    "f1": 0.8363636363636363
+  },
+  "observations": [
+    {
+      "left": "durée du pilote de six semaines",
+      "right": "le test pilote est prévu pour six semaines",
+      "same": true,
+      "similarity": 0.7053681015968323
+    },
+    {
+      "left": "durée du pilote de douze semaines",
+      "right": "le test s'étendra sur douze semaines",
+      "same": true,
+      "similarity": 0.6071192622184753
+    },
+    {
+      "left": "aucune donnée personnelle conservée",
+      "right": "aucune information nominative ne sera gardée",
+      "same": true,
+      "similarity": 0.5549262166023254
+    },
+    {
+      "left": "adresses nominatives gardées un an",
+      "right": "conservation annuelle des adresses personnelles",
+      "same": true,
+      "similarity": 0.4106580317020416
+    },
+    {
+      "left": "rapport envoyé mensuellement",
+      "right": "fréquence mensuelle d'envoi du rapport",
+      "same": true,
+      "similarity": 0.6983156204223633
+    },
+    {
+      "left": "rapport transmis chaque semaine",
+      "right": "livraison hebdomadaire du rapport",
+      "same": true,
+      "similarity": 0.5236461162567139
+    },
+    {
+      "left": "aucune décision prise par le système",
+      "right": "le système ne décide jamais de façon autonome",
+      "same": true,
+      "similarity": 0.7417666912078857
+    },
+    {
+      "left": "priorisation automatique des actions",
+      "right": "le système choisit seul les actions prioritaires",
+      "same": true,
+      "similarity": 0.6440035104751587
+    },
+    {
+      "left": "budget maximal de deux mille unités",
+      "right": "plafond budgétaire fixé à 2 000 unités",
+      "same": true,
+      "similarity": 0.6805436611175537
+    },
+    {
+      "left": "source mise à jour chaque jour",
+      "right": "actualisation quotidienne de la source",
+      "same": true,
+      "similarity": 0.5211442708969116
+    },
+    {
+      "left": "consentement requis avant collecte",
+      "right": "la collecte exige un accord préalable explicite",
+      "same": true,
+      "similarity": 0.67795729637146
+    },
+    {
+      "left": "déploiement limité aux commerces physiques",
+      "right": "seuls les points de vente physiques sont ciblés",
+      "same": true,
+      "similarity": 0.3666316270828247
+    },
+    {
+      "left": "démarrage possible en septembre",
+      "right": "le pilote pourrait commencer au mois de septembre",
+      "same": true,
+      "similarity": 0.4785712659358978
+    },
+    {
+      "left": "taux de réponse provisoire de vingt pour cent",
+      "right": "hypothèse temporaire d'un taux de réponse à 20 %",
+      "same": true,
+      "similarity": 0.725098729133606
+    },
+    {
+      "left": "conformité juridique non vérifiée",
+      "right": "la validation légale reste encore à effectuer",
+      "same": true,
+      "similarity": 0.3622579276561737
+    },
+    {
+      "left": "réduction possible de la charge administrative",
+      "right": "le modèle pourrait alléger les tâches administratives",
+      "same": true,
+      "similarity": 0.48289692401885986
+    },
+    {
+      "left": "baisse des coûts annoncée sans preuve",
+      "right": "aucune mesure ne justifie la réduction de coûts promise",
+      "same": true,
+      "similarity": 0.5104621052742004
+    },
+    {
+      "left": "préférence utilisateur sans enquête",
+      "right": "aucune étude ne soutient la préférence attribuée aux utilisateurs",
+      "same": true,
+      "similarity": 0.5946993827819824
+    },
+    {
+      "left": "doublement du marché non sourcé",
+      "right": "la croissance du marché est annoncée sans projection vérifiable",
+      "same": true,
+      "similarity": 0.5012578964233398
+    },
+    {
+      "left": "suppression totale des erreurs non démontrée",
+      "right": "aucun test ne prouve que toutes les erreurs disparaissent",
+      "same": true,
+      "similarity": 0.4031802713871002
+    },
+    {
+      "left": "responsabilité en cas de perte non résolue",
+      "right": "la question du responsable d'un dommage reste ouverte",
+      "same": true,
+      "similarity": 0.4217635989189148
+    },
+    {
+      "left": "détection des sources obsolètes non définie",
+      "right": "aucune réponse sur le repérage d'une source périmée",
+      "same": true,
+      "similarity": 0.32339566946029663
+    },
+    {
+      "left": "plan de retour arrière absent",
+      "right": "aucune procédure de repli n'est fournie",
+      "same": true,
+      "similarity": 0.33670058846473694
+    },
+    {
+      "left": "client peut désigner entreprise ou représentant",
+      "right": "deux sens possibles du mot client restent valides",
+      "same": true,
+      "similarity": 0.3977360427379608
+    },
+    {
+      "left": "réussite mesurée par argent ou temps",
+      "right": "gain financier et temps libéré sont deux critères possibles",
+      "same": true,
+      "similarity": 0.39162951707839966
+    },
+    {
+      "left": "durée du pilote de six semaines",
+      "right": "actualisation quotidienne de la source",
+      "same": false,
+      "similarity": 0.35998785495758057
+    },
+    {
+      "left": "durée du pilote de douze semaines",
+      "right": "la collecte exige un accord préalable explicite",
+      "same": false,
+      "similarity": 0.35374027490615845
+    },
+    {
+      "left": "aucune donnée personnelle conservée",
+      "right": "seuls les points de vente physiques sont ciblés",
+      "same": false,
+      "similarity": 0.28088635206222534
+    },
+    {
+      "left": "adresses nominatives gardées un an",
+      "right": "le pilote pourrait commencer au mois de septembre",
+      "same": false,
+      "similarity": 0.28206196427345276
+    },
+    {
+      "left": "rapport envoyé mensuellement",
+      "right": "hypothèse temporaire d'un taux de réponse à 20 %",
+      "same": false,
+      "similarity": 0.34639570116996765
+    },
+    {
+      "left": "rapport transmis chaque semaine",
+      "right": "la validation légale reste encore à effectuer",
+      "same": false,
+      "similarity": 0.33909934759140015
+    },
+    {
+      "left": "aucune décision prise par le système",
+      "right": "le modèle pourrait alléger les tâches administratives",
+      "same": false,
+      "similarity": 0.5653935670852661
+    },
+    {
+      "left": "priorisation automatique des actions",
+      "right": "aucune mesure ne justifie la réduction de coûts promise",
+      "same": false,
+      "similarity": 0.2973242700099945
+    },
+    {
+      "left": "budget maximal de deux mille unités",
+      "right": "aucune étude ne soutient la préférence attribuée aux utilisateurs",
+      "same": false,
+      "similarity": 0.22870470583438873
+    },
+    {
+      "left": "source mise à jour chaque jour",
+      "right": "la croissance du marché est annoncée sans projection vérifiable",
+      "same": false,
+      "similarity": 0.3435114622116089
+    },
+    {
+      "left": "consentement requis avant collecte",
+      "right": "aucun test ne prouve que toutes les erreurs disparaissent",
+      "same": false,
+      "similarity": 0.39183545112609863
+    },
+    {
+      "left": "déploiement limité aux commerces physiques",
+      "right": "la question du responsable d'un dommage reste ouverte",
+      "same": false,
+      "similarity": 0.25448936223983765
+    },
+    {
+      "left": "démarrage possible en septembre",
+      "right": "aucune réponse sur le repérage d'une source périmée",
+      "same": false,
+      "similarity": 0.3720242381095886
+    },
+    {
+      "left": "taux de réponse provisoire de vingt pour cent",
+      "right": "aucune procédure de repli n'est fournie",
+      "same": false,
+      "similarity": 0.49473604559898376
+    },
+    {
+      "left": "conformité juridique non vérifiée",
+      "right": "deux sens possibles du mot client restent valides",
+      "same": false,
+      "similarity": 0.23309262096881866
+    },
+    {
+      "left": "réduction possible de la charge administrative",
+      "right": "gain financier et temps libéré sont deux critères possibles",
+      "same": false,
+      "similarity": 0.3052172064781189
+    },
+    {
+      "left": "baisse des coûts annoncée sans preuve",
+      "right": "le test pilote est prévu pour six semaines",
+      "same": false,
+      "similarity": 0.5294938683509827
+    },
+    {
+      "left": "préférence utilisateur sans enquête",
+      "right": "le test s'étendra sur douze semaines",
+      "same": false,
+      "similarity": 0.26508721709251404
+    },
+    {
+      "left": "doublement du marché non sourcé",
+      "right": "aucune information nominative ne sera gardée",
+      "same": false,
+      "similarity": 0.2862933278083801
+    },
+    {
+      "left": "suppression totale des erreurs non démontrée",
+      "right": "conservation annuelle des adresses personnelles",
+      "same": false,
+      "similarity": 0.4133427143096924
+    },
+    {
+      "left": "responsabilité en cas de perte non résolue",
+      "right": "fréquence mensuelle d'envoi du rapport",
+      "same": false,
+      "similarity": 0.4189743399620056
+    },
+    {
+      "left": "détection des sources obsolètes non définie",
+      "right": "livraison hebdomadaire du rapport",
+      "same": false,
+      "similarity": 0.1605660319328308
+    },
+    {
+      "left": "plan de retour arrière absent",
+      "right": "le système ne décide jamais de façon autonome",
+      "same": false,
+      "similarity": 0.30436813831329346
+    },
+    {
+      "left": "client peut désigner entreprise ou représentant",
+      "right": "le système choisit seul les actions prioritaires",
+      "same": false,
+      "similarity": 0.31812894344329834
+    },
+    {
+      "left": "réussite mesurée par argent ou temps",
+      "right": "plafond budgétaire fixé à 2 000 unités",
+      "same": false,
+      "similarity": 0.22337758541107178
+    }
+  ]
+}

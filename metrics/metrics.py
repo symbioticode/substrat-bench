@@ -42,7 +42,7 @@ def match_assertion_to_incident(
     assertion: Dict[str, Any],
     incidents: List[Dict[str, Any]],
     source_ref_tolerance: int = 0,  # tour_n exact requis
-    similarity_threshold: float = 0.50,
+    similarity_threshold: float = 0.36,
     allow_lexical_fallback: bool = True,
 ) -> Optional[Dict[str, Any]]:
     """

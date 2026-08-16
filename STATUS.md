@@ -1,17 +1,17 @@
 # STATUS.md — État du chantier (source de vérité)
 
-## Sprint courant : préparation v0.3.0
-## Statut : HARNAIS_MOCK_VALIDÉ — EXPÉRIENCE_RÉELLE_BLOQUÉE
+## Sprint courant : Sprint 0 — corpus et calibration
+## Statut : SPRINT_0_GELÉ — EXPÉRIENCE_RÉELLE_BLOQUÉE
 ## Version : v0.3.0
 ## Date MAJ : 2026-08-16
 
 ### Blocage Sprint 0 (décisions D1-D4 §6 protocole)
 | Décision | Statut | Détail |
 |----------|--------|--------|
-| D1 Corpus source | ❌ BLOQUANT | Choisir session TI-360 vs LocalContext vs synthétique |
-| D2 Modèle unique + budget | ❌ BLOQUANT | Claude-3.5-Sonnet / GPT-4o / Local — clés API + budget |
+| D1 Corpus source | ✅ DÉCIDÉ | B LocalContext anonymisé; 11 tours réels + 48 injectés |
+| D2 Modèle unique + budget | ⚠️ DÉCIDÉ, CLÉ ABSENTE | `gpt-4.1-mini-2025-04-14`; 230 réponses A+B |
 | D3 Traçabilité P4 Option B | ✅ ADOPTÉ PROVISOIRE | DEC-006, niveau fil round 2 |
-| D4 Seuil similarité | ⏳ Sprint 1 | Calibrer sur échantillon manuel 50 paires |
+| D4 Seuil similarité | ✅ FIGÉ | `0.36`; 50 paires; all-MiniLM-L6-v2; F1=0.8364 |
 
 ### Progression BR (brainstorm/)
 | BR | Sujet | Statut | Sprint cible |
@@ -34,16 +34,18 @@
 - P2 = six lectures indépendantes réutilisées par P2@3/P2@4/P2@6.
 - Registre d'inférence : exactement 23 réponses par répétition complète.
 - M05 vectorielle, M09/M10 et comparaisons Question 0 générées.
-- Gate mock A/B : 46/46 lignes ; suite dédiée : 9/9 tests.
+- Gate mock A/B rejoué sur le corpus gelé; suite complète : 16/16 tests.
 - Observabilité AGNOS v2 : état du runner et de P0–P4, sans remplacement du
   registre scientifique (`docs/agnos-research-profile.md`).
-- Les fichiers corpus et vérité terrain suivis sur `main` sont vides. Le contenu
-  non commité de l'ancien worktree n'est pas intégré implicitement.
+- La branche Sprint 0 contient un corpus hybride LocalContext anonymisé et 24
+  incidents contrôlés (4 par type), seed 42. Les identifiants sont opaques et
+  tous les tours sont mêlés dans deux conversations composites opaques;
+  validation indépendante OpenCode : GEL OUI le 2026-08-16.
 
 ### Prochaine action requise
-**ARBITRE_FINAL doit résoudre D1, D2 et valider D4**, puis intégrer un
-corpus/vérité terrain revus avant tout run LLM réel. Le harnais mock ne vaut
-pas résultat expérimental.
+**Fournir `OPENAI_API_KEY` pour le smoke test réel borné.** Aucun run LLM
+réel n'est lancé avant ces portes. Le harnais mock ne vaut pas résultat
+expérimental.
 
 ### Commandes de vérification
 ```bash
@@ -51,7 +53,7 @@ pas résultat expérimental.
 nix-shell          # ou: pip install -r requirements.txt
 
 # Corpus (nécessite D1 résolu)
-python corpus/generate_corpus.py
+python corpus/generate_corpus.py --force  # seulement avant gel / révision explicite
 
 # Test isolation (Sprint 1)
 pytest pipelines/common/isolation.py::test_isolation_assertion -v
