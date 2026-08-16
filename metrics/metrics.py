@@ -9,6 +9,12 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 import csv
+import sys
+
+CODE_ROOT = Path(__file__).parents[1]
+sys.path.insert(0, str(CODE_ROOT))
+from pipelines.common.agregation import text_similarity
+
 
 # Ground truth loading
 def load_ground_truth(gt_path: Path) -> List[Dict[str, Any]]:
@@ -21,18 +27,23 @@ def load_ground_truth(gt_path: Path) -> List[Dict[str, Any]]:
 def load_pipeline_results(result_path: Path) -> List[Dict[str, Any]]:
     """Charge assertions avec source_ref."""
     results = []
-    with open(result_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                results.append(json.loads(line))
+    text = result_path.read_text(encoding="utf-8").strip()
+    if not text:
+        return []
+    if text.startswith("["):
+        return json.loads(text)
+    for line in text.splitlines():
+        if line.strip():
+            results.append(json.loads(line))
     return results
 
 
 def match_assertion_to_incident(
     assertion: Dict[str, Any],
     incidents: List[Dict[str, Any]],
-    source_ref_tolerance: int = 0  # tour_n exact requis
+    source_ref_tolerance: int = 0,  # tour_n exact requis
+    similarity_threshold: float = 0.50,
+    allow_lexical_fallback: bool = True,
 ) -> Optional[Dict[str, Any]]:
     """
     Trouve incident correspondant à l'assertion.
@@ -51,7 +62,12 @@ def match_assertion_to_incident(
                 ref.get("tour_n") == a_tour):
                 # Vérification cohérence type/epistemic_state
                 inc_type = inc.get("type", "")
-                if _epistemic_matches_type(a_epistemic, inc_type):
+                reference_text = inc.get("description_courte", "")
+                similarity_ok = bool(reference_text) and text_similarity(
+                    assertion.get("text", assertion.get("representative_text", "")), reference_text,
+                    allow_lexical_fallback=allow_lexical_fallback,
+                ) >= similarity_threshold
+                if _epistemic_matches_type(a_epistemic, inc_type) and similarity_ok:
                     return inc
     return None
 
@@ -66,14 +82,14 @@ def _epistemic_matches_type(epistemic: str, inc_type: str) -> bool:
         "LACUNE_SILENCIEUSE": "N",
         "AMBIGU_GENUINE": "N"
     }
-    return mapping.get(inc_type, "") == epistemic or epistemic in ("B", "N", "T", "F")
+    return mapping.get(inc_type, "") == epistemic
 
 
 def compute_metrics(
     pipeline_results: List[Dict[str, Any]],
     ground_truth: List[Dict[str, Any]],
-    tokens_used: int = 0,
-    time_ms: int = 0
+    costs: Optional[Dict[str, Any]] = None,
+    allow_lexical_fallback: bool = True,
 ) -> Dict[str, Any]:
     """
     Calcule M01-M05, M08 pour un pipeline sur un cycle.
@@ -101,7 +117,8 @@ def compute_metrics(
         if confidence in confidence_total:
             confidence_total[confidence] += 1
         
-        matched = match_assertion_to_incident(assertion, ground_truth)
+        matched = match_assertion_to_incident(assertion, ground_truth,
+                                               allow_lexical_fallback=allow_lexical_fallback)
         
         if matched:
             true_positives += 1
@@ -126,7 +143,7 @@ def compute_metrics(
             false_signals += 1
     
     # M01 Detection Recall
-    detection_recall = true_positives / n_incidents if n_incidents > 0 else 0.0
+    detection_recall = len(detected_incidents) / n_incidents if n_incidents > 0 else 0.0
     
     # M02 Localization Precision
     localization_precision = localized_correctly / true_positives if true_positives > 0 else 0.0
@@ -142,8 +159,18 @@ def compute_metrics(
         else:
             calibration[level] = None
     
-    # M05 Cost per Detection
-    cost_per_detection = (tokens_used + time_ms / 1000) / true_positives if true_positives > 0 else float('inf')
+    # M05 reste un vecteur : aucune addition d'unités incompatibles.
+    costs = costs or {}
+    def per_tp(name: str):
+        value = costs.get(name)
+        return (value / true_positives) if value is not None and true_positives else None
+    cost_per_detection = {
+        "llm_responses_per_tp": per_tp("llm_responses"),
+        "input_tokens_per_tp": per_tp("input_tokens"),
+        "output_tokens_per_tp": per_tp("output_tokens"),
+        "wall_time_ms_per_tp": per_tp("wall_time_ms"),
+        "estimated_cost_usd_per_tp": per_tp("estimated_cost_usd"),
+    }
     
     # M08 Implementation Effort (statique, calculé une fois)
     # Voir compute_implementation_effort()
@@ -153,7 +180,7 @@ def compute_metrics(
         "M02_localization_precision": round(localization_precision, 4),
         "M03_false_signal_rate": round(false_signal_rate, 4),
         "M04_confidence_calibration": {k: round(v, 4) if v else None for k, v in calibration.items()},
-        "M05_cost_per_detection": round(cost_per_detection, 2),
+        "M05_cost_per_detection": cost_per_detection,
         "M06_traceability_utility": {"required_manual_step": True, "note": "Test aveugle humain 8 assertions"},
         "M07_closure_appropriate": {"required_manual_step": True, "note": "Vérification AMBIGU_GENUINE"},
         "M08_implementation_effort": None,  # Rempli par compute_implementation_effort()
@@ -193,8 +220,8 @@ def compute_implementation_effort(pipeline_name: str, code_root: Path) -> Dict[s
     # Appels LLM par cycle (estimés §1 protocole)
     llm_calls = {
         "P0": 1,
-        "P1": 3,      # 3 instances
-        "P2": 6,      # 3 instances × 2 rounds
+        "P1": 6,      # 3 instances × 2 rounds
+        "P2": 6,      # 6 lectures indépendantes imbriquées
         "P3": 4,      # 3 parseurs + 1 arbitre
         "P4": 6       # 3 parseurs + 2 cartographes + 1 noyau
     }
@@ -208,7 +235,8 @@ def compute_implementation_effort(pipeline_name: str, code_root: Path) -> Dict[s
 def run_all_metrics(
     results_dir: Path,
     ground_truth_path: Path,
-    cycles: int = 5
+    cycles: int = 5,
+    cycle_labels: Tuple[str, ...] = ("A", "B"),
 ) -> Tuple[List[Dict[str, Any]], Path]:
     """
     Calcule métriques pour tous pipelines × tous cycles.
@@ -216,41 +244,70 @@ def run_all_metrics(
     """
     incidents = load_ground_truth(ground_truth_path)
     
+    ledger_path = results_dir / "inference_ledger.jsonl"
+    ledger = load_pipeline_results(ledger_path) if ledger_path.exists() else []
+    allow_lexical_fallback = bool(ledger) and all(row.get("provider") == "mock" for row in ledger)
     all_metrics = []
-    
-    for cycle in range(cycles):
-        cycle_dir = results_dir / f"cycle_{cycle}" / "raw_outputs"
+    metric_index = {}
+
+    for cycle_label in cycle_labels:
+      for cycle in range(cycles):
+        cycle_dir = results_dir / f"cycle_{cycle_label}_{cycle}" / "raw_outputs"
         if not cycle_dir.exists():
             continue
-        
-        for pipeline in ["P0", "P1", "P2", "P3", "P4"]:
-            # Trouve fichier parsed
-            parsed_files = list(cycle_dir.glob(f"{pipeline.lower()}_*_parsed.jsonl"))
-            if not parsed_files:
-                # Try nucleus for P4, arbiter for P3
-                if pipeline == "P4":
-                    parsed_files = list(cycle_dir.glob("p4_nucleus*.jsonl"))
-                elif pipeline == "P3":
-                    parsed_files = list(cycle_dir.glob("p3_arbitre*.jsonl"))
-            
-            if not parsed_files:
+        result_files = {
+            "P0": cycle_dir / f"p0_cycle{cycle}_parsed.jsonl",
+            "P1": cycle_dir / f"p1_cycle{cycle}_retained.json",
+            "P2@3": cycle_dir / f"p2_at3_cycle{cycle}_retained.json",
+            "P2@4": cycle_dir / f"p2_at4_cycle{cycle}_retained.json",
+            "P2@6": cycle_dir / f"p2_at6_cycle{cycle}_retained.json",
+            "P3": cycle_dir / f"p3_arbitre_cycle{cycle}.jsonl",
+            "P4": cycle_dir / f"p4_nucleus_cycle{cycle}.jsonl",
+        }
+        for method, result_path in result_files.items():
+            if not result_path.exists():
                 continue
-            
-            results = load_pipeline_results(parsed_files[0])
-            
-            # Tokens/time estimation (depuis logs ou approximation)
-            tokens = sum(len(str(r).split()) * 1.3 for r in results)
-            time_ms = 0  # TODO: collecter depuis logs
-            
-            metrics = compute_metrics(results, incidents, int(tokens), time_ms)
-            metrics["pipeline"] = pipeline
-            metrics["cycle"] = cycle
-            
-            # M08
-            code_root = results_dir.parent
-            metrics["M08_implementation_effort"] = compute_implementation_effort(pipeline, code_root)
-            
+            pipeline = method.split("@")[0]
+            calls = [row for row in ledger if row.get("pipeline") == pipeline
+                     and row.get("cycle") == cycle_label and row.get("repetition") == cycle]
+            if method.startswith("P2@"):
+                limit = int(method.split("@")[1])
+                calls = [row for row in calls if row.get("response_index", 99) <= limit]
+            costs = _sum_ledger_costs(calls)
+            metrics = compute_metrics(load_pipeline_results(result_path), incidents, costs,
+                                      allow_lexical_fallback=allow_lexical_fallback)
+            metrics.update({"pipeline": method, "cycle": cycle_label, "repetition": cycle})
+            metrics["M08_implementation_effort"] = compute_implementation_effort(pipeline, CODE_ROOT)
+            metrics["M09_correlated_miss_rate"] = _compute_m09(
+                cycle_dir, pipeline, cycle, incidents, method, allow_lexical_fallback
+            )
             all_metrics.append(metrics)
+            metric_index[(cycle_label, cycle, method)] = metrics
+
+    # M10 : différence B-A appariée par répétition et architecture.
+    for pipeline in ("P1", "P2@3", "P3", "P4"):
+        for cycle in range(cycles):
+            a = metric_index.get(("A", cycle, pipeline))
+            b = metric_index.get(("B", cycle, pipeline))
+            if a and b:
+                delta = b["M01_detection_recall"] - a["M01_detection_recall"]
+                a["M10_persona_delta_recall"] = None
+                b["M10_persona_delta_recall"] = round(delta, 4)
+
+    comparisons = []
+    for cycle in range(cycles):
+        for method, control in (("P1", "P2@6"), ("P3", "P2@4"), ("P4", "P2@6")):
+            left = metric_index.get(("A", cycle, method))
+            right = metric_index.get(("A", cycle, control))
+            if left and right:
+                comparisons.append(_comparison_record(method, control, cycle, left, right, "equal_responses"))
+        for method in ("P1", "P3", "P4"):
+            left = metric_index.get(("A", cycle, method))
+            right = metric_index.get(("A", cycle, "P2@3"))
+            if left and right:
+                comparisons.append(_comparison_record(method, "P2@3", cycle, left, right, "budget_inegal"))
+
+    cycle_c = _cycle_c_decision(all_metrics)
     
     # Agrégation par pipeline (médiane sur cycles)
     summary = aggregate_metrics(all_metrics)
@@ -260,7 +317,19 @@ def run_all_metrics(
     with open(report_path, 'w', encoding='utf-8') as f:
         json.dump({
             "per_cycle": all_metrics,
-            "summary": summary
+            "summary": summary,
+            "question_0_comparisons": comparisons,
+            "ledger_rows": len(ledger),
+            "D4_matching_backend": ("all-MiniLM-L6-v2" if not allow_lexical_fallback
+                                     else "lexical_jaccard_mock_only"),
+            "cycle_c_decision": cycle_c,
+            "M09": {
+                "per_method": [
+                    {"pipeline": m["pipeline"], "cycle": m["cycle"], "repetition": m["repetition"],
+                     **m["M09_correlated_miss_rate"]}
+                    for m in all_metrics if m.get("M09_correlated_miss_rate")
+                ]
+            },
         }, f, ensure_ascii=False, indent=2)
     
     # CSV summary
@@ -270,36 +339,148 @@ def run_all_metrics(
     return all_metrics, report_path
 
 
+def _sum_ledger_costs(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def nullable_sum(key: str):
+        values = [row.get(key) for row in rows]
+        return sum(values) if values and all(value is not None for value in values) else None
+    return {
+        "llm_responses": len(rows),
+        "input_tokens": nullable_sum("input_tokens"),
+        "output_tokens": nullable_sum("output_tokens"),
+        "wall_time_ms": nullable_sum("wall_time_ms"),
+        "estimated_cost_usd": nullable_sum("estimated_cost_usd"),
+    }
+
+
+def _compute_m09(cycle_dir: Path, pipeline: str, cycle: int,
+                 incidents: List[Dict[str, Any]], method: str,
+                 allow_lexical_fallback: bool) -> Optional[Dict[str, Any]]:
+    patterns = {
+        "P1": f"p1_p1_instance_*_round1_cycle{cycle}_raw.jsonl",
+        "P2": f"p2_instance_*_cycle{cycle}_raw.jsonl",
+        "P3": f"p3_p3_parseur_*_cycle{cycle}.jsonl",
+        "P4": f"p4_p4_parseur_*_cycle{cycle}.jsonl",
+    }
+    if pipeline == "P0":
+        return None
+    files = sorted(cycle_dir.glob(patterns[pipeline]))
+    limit = int(method.split("@")[1]) if method.startswith("P2@") else 3
+    files = files[:limit]
+    if not files:
+        return None
+    outputs = [load_pipeline_results(path) for path in files]
+    missed = []
+    for incident in incidents:
+        if not any(match_assertion_to_incident(
+            assertion, [incident], allow_lexical_fallback=allow_lexical_fallback
+        ) for output in outputs for assertion in output):
+            missed.append(incident.get("incident_id"))
+    by_type = {}
+    incident_types = sorted({incident.get("type", "UNKNOWN") for incident in incidents})
+    for incident_type in incident_types:
+        population = [incident for incident in incidents if incident.get("type", "UNKNOWN") == incident_type]
+        missed_type = [incident for incident in population if incident.get("incident_id") in missed]
+        by_type[incident_type] = {
+            "rate": round(len(missed_type) / len(population), 4) if population else None,
+            "missed": [incident.get("incident_id") for incident in missed_type],
+            "total": len(population),
+        }
+    return {
+        "rate": round(len(missed) / len(incidents), 4) if incidents else None,
+        "missed": missed,
+        "readers": len(files),
+        "by_incident_type": by_type,
+    }
+
+
+def _comparison_record(method: str, control: str, repetition: int,
+                       left: Dict[str, Any], right: Dict[str, Any], budget_relation: str) -> Dict[str, Any]:
+    left_cost = left["M05_cost_per_detection"]
+    right_cost = right["M05_cost_per_detection"]
+    return {
+        "method": method,
+        "control": control,
+        "cycle": "A",
+        "repetition": repetition,
+        "llm_responses": {"method": left["M08_implementation_effort"]["llm_calls_per_cycle"],
+                          "control": int(control.split("@")[1])},
+        "input_tokens": {"method_per_tp": left_cost["input_tokens_per_tp"], "control_per_tp": right_cost["input_tokens_per_tp"]},
+        "output_tokens": {"method_per_tp": left_cost["output_tokens_per_tp"], "control_per_tp": right_cost["output_tokens_per_tp"]},
+        "wall_time_ms": {"method_per_tp": left_cost["wall_time_ms_per_tp"], "control_per_tp": right_cost["wall_time_ms_per_tp"]},
+        "estimated_cost_usd": {"method_per_tp": left_cost["estimated_cost_usd_per_tp"], "control_per_tp": right_cost["estimated_cost_usd_per_tp"]},
+        "budget_relation": budget_relation,
+        "metrics": {key: {"method": left.get(key), "control": right.get(key)} for key in
+                    ("M01_detection_recall", "M02_localization_precision", "M03_false_signal_rate",
+                     "M07_closure_appropriate", "M09_correlated_miss_rate", "M10_persona_delta_recall")},
+    }
+
+
+def _cycle_c_decision(metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Applique la porte préenregistrée §1quater sur M09 à N=3."""
+    native = {"P1", "P2@3", "P3", "P4"}
+    rates = {label: [m["M09_correlated_miss_rate"]["rate"] for m in metrics
+                     if m["cycle"] == label and m["pipeline"] in native
+                     and m.get("M09_correlated_miss_rate", {}).get("rate") is not None]
+             for label in ("A", "B")}
+    aggregates = {label: (sum(values) / len(values) if values else None) for label, values in rates.items()}
+    if aggregates["A"] is None or aggregates["B"] is None:
+        return {"triggered": None, "reason": "cycles_A_B_incomplets", "M09_aggregate": aggregates}
+    relative_drop = ((aggregates["A"] - aggregates["B"]) / aggregates["A"]
+                     if aggregates["A"] > 0 else None)
+    triggered = (relative_drop is None or relative_drop < 1 / 3) or aggregates["B"] >= 0.25
+    return {
+        "triggered": triggered,
+        "M09_aggregate": aggregates,
+        "relative_drop_A_to_B": relative_drop,
+        "rule": "trigger if relative drop < 1/3 OR Cycle B M09 >= 0.25",
+    }
+
+
 def aggregate_metrics(per_cycle: List[Dict]) -> Dict[str, Dict[str, float]]:
     """Médiane + IQR par pipeline sur métriques clés."""
-    import numpy as np
+    from statistics import median
+
+    def percentile(values, fraction):
+        ordered = sorted(values)
+        if not ordered:
+            return 0.0
+        position = (len(ordered) - 1) * fraction
+        lower = int(position)
+        upper = min(lower + 1, len(ordered) - 1)
+        weight = position - lower
+        return ordered[lower] * (1 - weight) + ordered[upper] * weight
     
     by_pipeline = defaultdict(list)
     for m in per_cycle:
-        by_pipeline[m["pipeline"]].append(m)
+        by_pipeline[(m["pipeline"], m["cycle"])].append(m)
     
     summary = {}
-    for pipeline, cycles in by_pipeline.items():
+    for (pipeline, cycle_label), cycles in by_pipeline.items():
         def med(key):
             vals = [c[key] for c in cycles if c[key] is not None]
-            return float(np.median(vals)) if vals else 0.0
+            return float(median(vals)) if vals else 0.0
         
         def iqr(key):
             vals = [c[key] for c in cycles if c[key] is not None]
             if len(vals) < 2:
                 return 0.0
-            q75, q25 = np.percentile(vals, [75, 25])
+            q75, q25 = percentile(vals, 0.75), percentile(vals, 0.25)
             return float(q75 - q25)
         
-        summary[pipeline] = {
+        summary[f"{pipeline}-{cycle_label}"] = {
+            "pipeline": pipeline,
+            "cycle": cycle_label,
             "M01_recall_median": med("M01_detection_recall"),
             "M01_recall_iqr": iqr("M01_detection_recall"),
             "M02_precision_median": med("M02_localization_precision"),
             "M02_precision_iqr": iqr("M02_localization_precision"),
             "M03_false_signal_median": med("M03_false_signal_rate"),
             "M03_false_signal_iqr": iqr("M03_false_signal_rate"),
-            "M05_cost_median": med("M05_cost_per_detection"),
-            "M05_cost_iqr": iqr("M05_cost_per_detection"),
+            "M05_cost_vector": {
+                key: [c["M05_cost_per_detection"].get(key) for c in cycles]
+                for key in ("llm_responses_per_tp", "input_tokens_per_tp", "output_tokens_per_tp",
+                            "wall_time_ms_per_tp", "estimated_cost_usd_per_tp")
+            },
             "M08_loc": cycles[0].get("M08_implementation_effort", {}).get("lines_of_code", 0),
             "M08_llm_calls": cycles[0].get("M08_implementation_effort", {}).get("llm_calls_per_cycle", 0),
             "cycles": len(cycles)
@@ -311,19 +492,18 @@ def aggregate_metrics(per_cycle: List[Dict]) -> Dict[str, Dict[str, float]]:
 def write_summary_csv(summary: Dict, path: Path) -> None:
     """Écrit summary.csv lisible par instance analyse sans code."""
     fieldnames = [
-        "pipeline", "M01_recall_median", "M01_recall_iqr",
+        "pipeline", "cycle", "M01_recall_median", "M01_recall_iqr",
         "M02_precision_median", "M02_precision_iqr",
         "M03_false_signal_median", "M03_false_signal_iqr",
-        "M05_cost_median", "M05_cost_iqr",
+        "M05_cost_vector",
         "M08_loc", "M08_llm_calls", "cycles"
     ]
     
     with open(path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for pipeline, vals in summary.items():
-            row = {"pipeline": pipeline, **vals}
-            writer.writerow(row)
+        for vals in summary.values():
+            writer.writerow(vals)
 
 
 # === Test unitaire ===
@@ -331,9 +511,11 @@ def test_metrics():
     """Test basique métriques."""
     gt = [
         {"incident_id": "INC-01", "type": "CONTRADICTION_INTRA",
+         "description_courte": "Contradiction détectée",
          "source_ref_origine": {"session_id": "s1", "tour_n": 5},
          "source_ref_reprise": {"session_id": "s1", "tour_n": 8}},
         {"incident_id": "INC-02", "type": "DERIVE",
+         "description_courte": "Dérive β=N",
          "source_ref_origine": {"session_id": "s2", "tour_n": 3},
          "source_ref_reprise": {"session_id": "s3", "tour_n": 1}},
     ]
@@ -346,7 +528,9 @@ def test_metrics():
          "epistemic_state": "N", "confidence": "FORT"},
     ]
     
-    m = compute_metrics(results, gt, 1000, 5000)
+    m = compute_metrics(results, gt, {"llm_responses": 1, "input_tokens": 1000,
+                                      "output_tokens": 100, "wall_time_ms": 5000,
+                                      "estimated_cost_usd": None})
     
     assert m["M01_detection_recall"] == 1.0
     assert m["M02_localization_precision"] == 1.0
@@ -359,8 +543,8 @@ def test_metrics():
          "epistemic_state": "T", "confidence": "FAIBLE"}
     ]
     
-    m2 = compute_metrics(results_with_fp, gt, 1000, 5000)
-    assert m2["M03_false_signal_rate"] == 1/3
+    m2 = compute_metrics(results_with_fp, gt)
+    assert m2["M03_false_signal_rate"] == 0.3333
     
     print("[OK] test_metrics passed")
 

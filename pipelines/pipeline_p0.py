@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
 
-from pipelines.common.isolation import isolated_call, IsolationConfig, validate_isolation
-from pipelines.common.prompts import get_prompt, get_prompt_with_persona
+from pipelines.common.isolation import isolated_call, IsolationConfig, CallMetadata
+from pipelines.common.prompts import get_prompt
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, DialogueAct, EpistemicState
 )
@@ -79,6 +79,8 @@ def run_p0(
     cycle_num: int = 0,
     cycle_label: str = "A",
     instance_id: str = "p0_single",
+    provider: str = "unknown",
+    ledger=None,
     **kwargs
 ) -> P0Output:
     """
@@ -100,17 +102,19 @@ def run_p0(
     config = IsolationConfig(
         model=model,
         max_tokens=max_tokens,
-        temperature=temperature
+        temperature=temperature,
+        provider=provider,
     )
     
-    # Prompt P0 avec source_ref obligatoire — injection persona si Cycle B
-    if cycle_label == "B":
-        prompt = get_prompt_with_persona("P0_extraction", instance_id=instance_id, corpus_text=corpus_text)
-    else:
-        prompt = get_prompt("P0_extraction", corpus_text=corpus_text)
+    # P0 est le plancher invariant : strictement identique en Cycles A et B.
+    prompt = get_prompt("P0_extraction", corpus_text=corpus_text)
     
     # Appel isolé garanti
-    raw_output = isolated_call(client, config, prompt, corpus_text)
+    raw_output = isolated_call(
+        client, config, prompt, "",
+        metadata=CallMetadata("P0", cycle_label, cycle_num, "single", 1, 1, seed),
+        ledger=ledger,
+    )
     
     latency_ms = int((time.perf_counter() - start_time) * 1000)
     tokens_estimate = len(raw_output.split()) * 1.3  # Approximation grossière

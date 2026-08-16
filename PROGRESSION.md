@@ -21,12 +21,30 @@
 - [ ] BR-002, BR-006 → RÉSOLU
 - **Critère passage** : test isolation passe, D4 documenté
 
+> Mise à jour v0.3.0 : numérotation normative P1=débat, P2=vote. Le harnais
+> correspondant et son contrôle de budget sont implémentés ; D4 reste à figer.
+
 ## Sprint 2 — P2 (débat, contact autorisé)
 - [ ] `pipeline_p2.py` — débat multi-rounds (R=2)
 - [ ] Logs conservés par round (pas seulement sortie finale)
 - [ ] Test auto : contexte round 2 contient littéralement sorties round 1 autres instances
 - [ ] BR-003 (si non résolu Sprint 0) → vérifier exécution réelle
 - **Critère passage** : test injection contexte passe
+
+> Libellé historique obsolète : en v0.3.0, cette étape couvre P1 (débat). Le
+> test d'injection et l'ordonnancement par round passent en mode mock.
+
+## Gate Huang v0.3.0 — Implémentation
+
+- [x] P1 produit exactement 6 réponses et injecte les sorties concurrentes.
+- [x] P2 produit 6 sorties brutes, puis P2@3/P2@4/P2@6 par préfixes.
+- [x] Égalités 2/4 et 3/6 rejetées ; majorités 3/4 et 4/6 acceptées.
+- [x] `inference_ledger.jsonl` contient 23 lignes par répétition complète.
+- [x] M05 est un vecteur ; valeurs indisponibles à `null`.
+- [x] Comparaisons P1/P2@6, P3/P2@4 et P4/P2@6 produites en Cycle A.
+- [x] M09 au niveau lecture et M10 appariée A/B implémentées.
+- [ ] Corpus et vérité terrain revus/intégrés sur la branche d'exécution.
+- [ ] D1, D2 et D4 figés, puis run réel autorisé (D3 = Option B provisoire).
 
 ## Sprint 3 — P3 et P4 (ETAU/SECS)
 - [ ] `pipeline_p3.py` — ETAU/SECS allégé (confiance binaire, traçabilité fil)
