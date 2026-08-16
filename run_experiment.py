@@ -150,6 +150,21 @@ def run_cycle(
             print(f"[WARN] Pipeline inconnu: {pipeline_name}")
             continue
         
+        # Vérifier si ce pipeline a déjà tourné dans ce cycle
+        cycle_dir = output_base / f"cycle_{cycle_label}_{cycle_num}"
+        raw_dir = cycle_dir / "raw_outputs"
+        p_check = {
+            "P0": raw_dir / f"p0_cycle{cycle_num}_parsed.jsonl",
+            "P1": raw_dir / f"p1_cycle{cycle_num}_retained.json",
+            "P2": cycle_dir / f"p2_native_cycle{cycle_num}.json",
+            "P3": cycle_dir / f"p3_arbitre_cycle{cycle_num}.json",
+            "P4": cycle_dir / f"p4_noyau_cycle{cycle_num}.json",
+        }.get(pipeline_name)
+        
+        if p_check and p_check.exists() and p_check.stat().st_size > 0:
+            print(f"[SKIP] Pipeline {pipeline_name} cycle {cycle_label}_{cycle_num} déjà exécuté ({p_check.name})")
+            continue
+
         func = PIPELINE_FUNCS[pipeline_name]
         agent_id = f"substrat-{pipeline_name.lower()}"
         task = f"cycle_{cycle_label}/repetition_{cycle_num}"
@@ -278,15 +293,9 @@ def main():
     output_base = REPO_ROOT / args.output
     output_base.mkdir(parents=True, exist_ok=True)
     ledger_path = output_base / "inference_ledger.jsonl"
-    if ledger_path.exists():
-        print(f"[ERROR] Registre déjà présent: {ledger_path}; utilisez un dossier --output neuf")
-        sys.exit(2)
     ledger = InferenceLedger(ledger_path)
     run_id = args.run_id or f"substrat-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
     agnos_path = Path(args.agnos_events) if args.agnos_events else output_base / "agnos_events.jsonl"
-    if agnos_path.exists():
-        print(f"[ERROR] Flux AGNOS déjà présent: {agnos_path}; utilisez une cible neuve")
-        sys.exit(2)
     agnos_writer = AgnosEventWriter(agnos_path, run_id)
     
     # Chargement corpus
@@ -331,6 +340,16 @@ def main():
     cycle_labels = {"off": ["A"], "on": ["B"], "both": ["A", "B"]}[args.personas]
     for cycle_label in cycle_labels:
       for cycle in range(args.cycles):
+        summary_path = output_base / f"cycle_{cycle_label}_{cycle}" / "cycle_summary.json"
+        if summary_path.exists() and summary_path.stat().st_size > 0:
+            print(f"[SKIP] Cycle {cycle_label}_{cycle} déjà complété ({summary_path})")
+            try:
+                cycle_results = json.loads(summary_path.read_text(encoding='utf-8'))
+                all_results.extend(cycle_results)
+            except Exception:
+                pass
+            continue
+
         cycle_results = run_cycle(
             cycle_num=cycle,
             pipelines=pipelines,
@@ -346,8 +365,7 @@ def main():
         all_results.extend(cycle_results)
         
         # Log intermédiaire
-        log_path = output_base / f"cycle_{cycle_label}_{cycle}" / "cycle_summary.json"
-        log_path.write_text(json.dumps(cycle_results, ensure_ascii=False, indent=2), encoding='utf-8')
+        summary_path.write_text(json.dumps(cycle_results, ensure_ascii=False, indent=2), encoding='utf-8')
     
     # Métriques finales
     if not args.skip_metrics:
