@@ -24,6 +24,7 @@ RÈGLES :
 - dialogue_act : Inform (fait), Disagree (contradiction), Correct (correction), FlagGap (lacune), FlagAmbiguity (ambiguïté), Hypothesize (hypothèse β=N), Project (projection non vérifiée)
 - epistemic_state : T (soutenu), F (contredit), B (conflit), N (ignorance/ambiguïté)
 - Une assertion par ligne, JSON valide
+- Maximum 32 assertions : priorisez contradictions, dérives, lacunes et ambiguïtés
 - Pas de texte explicatif hors JSON
 
 CORPUS :
@@ -40,6 +41,7 @@ RÈGLES :
 - dialogue_act : Inform (fait), Disagree (contradiction), Correct (correction), FlagGap (lacune), FlagAmbiguity (ambiguïté), Hypothesize (hypothèse β=N), Project (projection non vérifiée)
 - epistemic_state : T (soutenu), F (contredit), B (conflit), N (ignorance/ambiguïté)
 - Une assertion par ligne, JSON valide
+- Maximum 32 assertions : priorisez contradictions, dérives, lacunes et ambiguïtés
 - Pas de texte explicatif hors JSON
 
 CORPUS :
@@ -62,6 +64,7 @@ INSTRUCTIONS SPÉCIFIQUES :
 - Conservez source_ref EXACT (ne changez pas session_id/tour_n)
 - Marquez dialogue_act "Correct" si vous corrigez votre propre assertion précédente
 - Une assertion par ligne, JSON valide
+- Maximum 32 assertions révisées
 
 CORPUS :
 {corpus_text}
@@ -83,6 +86,7 @@ RÈGLES :
 - dialogue_act : Inform (fait), Disagree (contradiction), Correct (correction), FlagGap (lacune), FlagAmbiguity (ambiguïté), Hypothesize (hypothèse β=N), Project (projection non vérifiée)
 - epistemic_state : T (soutenu), F (contredit), B (conflit), N (ignorance/ambiguïté)
 - Une assertion par ligne, JSON valide
+- Maximum 32 assertions : priorisez contradictions, dérives, lacunes et ambiguïtés
 - Pas de texte explicatif hors JSON
 
 CORPUS :
@@ -110,6 +114,7 @@ RÈGLES D'EXTRACTION :
 - Project : hypothèse reprise comme fait sans nouvelle preuve (DERIVE)
 - source_ref : session_id + tour_n EXACTS du corpus
 - epistemic_state : T (corpus soutient), F (corpus contredit), B (corpus conflit), N (corpus ni l'un ni l'autre)
+- Maximum 32 assertions : priorisez contradictions, dérives, lacunes et ambiguïtés
 
 CORPUS :
 {corpus_text}""",
@@ -143,7 +148,7 @@ SORTIES PARSEURS :
 SCHÉMA EXACT :
 {{"text": "...", "dialogue_act": "Inform|Disagree|Correct|FlagGap|FlagAmbiguity|Hypothesize|Project", "epistemic_state": "T|F|B|N", "source_ref": {{"session_id": "...", "tour_n": N}}, "reasoning": {{"steps": ["...", "..."]}}}}
 
-RÈGLES IDENTIQUES P3. PAS de confidence.
+RÈGLES IDENTIQUES P3. PAS de confidence. Maximum 32 assertions.
 
 CORPUS :
 {corpus_text}""",

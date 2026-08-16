@@ -14,6 +14,7 @@ import sys
 CODE_ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(CODE_ROOT))
 from pipelines.common.agregation import text_similarity
+from pipelines.common.schemas import iter_json_objects
 
 
 # Ground truth loading
@@ -24,18 +25,16 @@ def load_ground_truth(gt_path: Path) -> List[Dict[str, Any]]:
     return data.get("incidents", [])
 
 
-def load_pipeline_results(result_path: Path) -> List[Dict[str, Any]]:
+def load_pipeline_results(result_path: Path, limit: Optional[int] = None) -> List[Dict[str, Any]]:
     """Charge assertions avec source_ref."""
     results = []
     text = result_path.read_text(encoding="utf-8").strip()
     if not text:
         return []
     if text.startswith("["):
-        return json.loads(text)
-    for line in text.splitlines():
-        if line.strip():
-            results.append(json.loads(line))
-    return results
+        values = json.loads(text)
+        return values[:limit] if limit is not None else values
+    return list(iter_json_objects(text, limit=limit))
 
 
 def match_assertion_to_incident(
@@ -368,7 +367,7 @@ def _compute_m09(cycle_dir: Path, pipeline: str, cycle: int,
     files = files[:limit]
     if not files:
         return None
-    outputs = [load_pipeline_results(path) for path in files]
+    outputs = [load_pipeline_results(path, limit=32) for path in files]
     missed = []
     for incident in incidents:
         if not any(match_assertion_to_incident(

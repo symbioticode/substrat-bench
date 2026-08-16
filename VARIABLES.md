@@ -32,12 +32,12 @@ TOTAL_LLM_CALLS : 230 pour A+B; +115 seulement si Cycle C déclenché
 ## BLOC 4 — Budget tokens & Modèle (D2)
 ```
 MODEL_PROVIDER  : openai
-MODEL_NAME      : gpt-4.1-mini-2025-04-14
-API_KEY_ENV     : OPENAI_API_KEY (absente au 2026-08-16)
-MAX_TOKENS_CALL : 2000 (par défaut §2bis)
+MODEL_NAME      : deepseek-v4-flash (mode non-thinking)
+API_KEY_ENV     : DEEPSEEK_API_KEY (injectée depuis 61_AGORA/.env, jamais copiée)
+MAX_TOKENS_CALL : 4000 (uniforme) + capacité préenregistrée de 32 assertions/réponse
 TEMPERATURE     : 0.6 (variance contrôlée, §2 protocole)
 BUDGET_ESTIME   : 23 réponses × 5 répétitions × 2 cycles = 230 réponses
-COUT_ESTIME_USD : [À CALCULER selon modèle D2]
+COUT_ESTIME_USD : < 1 USD pour A+B, estimation conservatrice avant cache
 ```
 
 ## BLOC 5 — Corpus & Vérité terrain (D1, §3)

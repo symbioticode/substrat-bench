@@ -5,6 +5,7 @@ Usage: python run_experiment.py --cycles 5 [--pipelines P0,P1,P2,P3,P4]
 """
 import argparse
 import json
+import os
 import sys
 import time
 import uuid
@@ -104,6 +105,20 @@ def get_llm_client(model: str, provider: str = "mock") -> Any:
                 return sdk.chat.completions.create(model=model, messages=messages, max_tokens=max_tokens,
                                                    temperature=temperature, **kwargs)
         return OpenAIAdapter()
+    elif provider == "deepseek":
+        from openai import OpenAI
+        api_key = os.environ.get("DEEPSEEK_API_KEY")
+        if not api_key:
+            raise RuntimeError("DEEPSEEK_API_KEY absente de l'environnement")
+        sdk = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        class DeepSeekAdapter:
+            def create_message(self, model, messages, max_tokens, temperature, **kwargs):
+                # D2 fige le mode non-thinking pour éviter une variable cachée.
+                return sdk.chat.completions.create(
+                    model=model, messages=messages, max_tokens=max_tokens,
+                    temperature=temperature,
+                    extra_body={"thinking": {"type": "disabled"}}, **kwargs)
+        return DeepSeekAdapter()
     else:
         raise ValueError(f"Provider inconnu: {provider}")
 
@@ -237,16 +252,18 @@ def main():
     parser.add_argument("--cycles", type=int, default=5, help="Nombre de cycles (défaut: 5)")
     parser.add_argument("--pipelines", type=str, default=",".join(DEFAULT_PIPELINES),
                         help=f"Pipelines à exécuter (défaut: tous)")
-    parser.add_argument("--model", type=str, default="gpt-4.1-mini-2025-04-14",
+    parser.add_argument("--model", type=str, default="deepseek-v4-flash",
                         help="Modèle unique (D2)")
     parser.add_argument("--provider", type=str, default="mock",
-                        choices=["mock", "anthropic", "openai"],
+                        choices=["mock", "anthropic", "openai", "deepseek"],
                         help="Provider LLM (défaut: mock pour test)")
     parser.add_argument("--corpus", type=str, default="corpus/source/corpus_test.json",
                         help="Chemin corpus test")
     parser.add_argument("--output", type=str, default="results",
                         help="Dossier sortie")
     parser.add_argument("--seed", type=int, default=42, help="Seed global")
+    parser.add_argument("--max-tokens", type=int, default=4000,
+                        help="Plafond uniforme de sortie par appel (D2, défaut: 4000)")
     parser.add_argument("--skip-metrics", action="store_true", help="Ne pas calculer métriques")
     parser.add_argument("--personas", choices=["off", "on", "both"], default="both",
                         help="Cycles A, B ou les deux")
@@ -297,7 +314,7 @@ def main():
     
     # Paramètres partagés (VARIABLES.md)
     common_kwargs = {
-        "max_tokens": 2000,
+        "max_tokens": args.max_tokens,
         "temperature": 0.6,
         "n_rounds": 2,
         "n_cartographes": 2,

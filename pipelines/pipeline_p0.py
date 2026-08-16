@@ -12,7 +12,7 @@ from dataclasses import dataclass, asdict
 from pipelines.common.isolation import isolated_call, IsolationConfig, CallMetadata
 from pipelines.common.prompts import get_prompt
 from pipelines.common.schemas import (
-    SourceRef, StructuredAssertion, DialogueAct, EpistemicState
+    SourceRef, StructuredAssertion, DialogueAct, EpistemicState, iter_json_objects
 )
 
 
@@ -30,18 +30,13 @@ class P0Output:
 def parse_structured_output(raw_output: str, parseur_id: str = "p0") -> List[StructuredAssertion]:
     """Parse JSONL → liste StructuredAssertion avec validation basique."""
     assertions = []
-    for line_num, line in enumerate(raw_output.strip().split('\n'), 1):
-        line = line.strip()
-        if not line:
-            continue
+    for object_num, data in enumerate(iter_json_objects(raw_output, limit=32), 1):
         try:
-            data = json.loads(line)
-            
             # Validation champs requis
             required = ["text", "dialogue_act", "epistemic_state", "source_ref"]
             missing = [f for f in required if f not in data]
             if missing:
-                print(f"[P0 WARNING] Ligne {line_num}: champs manquants {missing}")
+                print(f"[P0 WARNING] Objet {object_num}: champs manquants {missing}")
                 continue
             
             src_data = data["source_ref"]
@@ -61,8 +56,8 @@ def parse_structured_output(raw_output: str, parseur_id: str = "p0") -> List[Str
             )
             assertions.append(assertion)
             
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
-            print(f"[P0 WARNING] Ligne {line_num} ignorée: {e}")
+        except (KeyError, ValueError) as e:
+            print(f"[P0 WARNING] Objet {object_num} ignoré: {e}")
             continue
     
     return assertions

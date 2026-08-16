@@ -15,7 +15,7 @@ from pipelines.common.isolation import (
     build_debate_round_messages, validate_isolation
 )
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
-from pipelines.common.schemas import SourceRef, StructuredAssertion, DialogueAct, EpistemicState
+from pipelines.common.schemas import SourceRef, StructuredAssertion, DialogueAct, EpistemicState, iter_json_objects
 from pipelines.common.agregation import SemanticClusterer, Assertion, ClusteredAssertion, majority_vote_aggregation
 
 
@@ -43,12 +43,8 @@ class P1Result:
 def parse_structured_output(raw_output: str, instance_id: str) -> List[StructuredAssertion]:
     """Parse JSONL → StructuredAssertion (identique P0/P2)."""
     assertions = []
-    for line in raw_output.strip().split('\n'):
-        line = line.strip()
-        if not line:
-            continue
+    for data in iter_json_objects(raw_output, limit=32):
         try:
-            data = json.loads(line)
             src_data = data["source_ref"]
             src = SourceRef(
                 session_id=src_data["session_id"],
@@ -64,7 +60,7 @@ def parse_structured_output(raw_output: str, instance_id: str) -> List[Structure
                 reasoning=data.get("reasoning")
             )
             assertions.append(assertion)
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
+        except (KeyError, ValueError) as e:
             print(f"[P1 {instance_id} WARNING] Ligne ignorée: {e}")
             continue
     return assertions

@@ -10,6 +10,33 @@ from enum import Enum
 import json
 
 
+def iter_json_objects(text: str, limit: Optional[int] = None):
+    """Extrait des objets JSON successifs, compacts ou indentés sur plusieurs lignes."""
+    decoder = json.JSONDecoder()
+    cursor = 0
+    yielded = 0
+    while cursor < len(text) and (limit is None or yielded < limit):
+        start = text.find("{", cursor)
+        if start < 0:
+            return
+        try:
+            value, end = decoder.raw_decode(text, start)
+        except json.JSONDecodeError:
+            cursor = start + 1
+            continue
+        values = value.get("assertions") if (
+            isinstance(value, dict) and "text" not in value
+            and isinstance(value.get("assertions"), list)
+        ) else [value]
+        for item in values:
+            if isinstance(item, dict):
+                yield item
+                yielded += 1
+                if limit is not None and yielded >= limit:
+                    break
+        cursor = end
+
+
 class DialogueAct(str, Enum):
     """Fonctions communicatives core (sous-ensemble DiAML ISO 24617-2)."""
     # General-purpose (utilisables dans toute dimension)
@@ -152,10 +179,13 @@ class ParseurOutput:
     @classmethod
     def from_jsonl(cls, text: str, parseur_id: str) -> "ParseurOutput":
         assertions = []
-        for line in text.strip().split("\n"):
-            if line.strip():
-                d = json.loads(line)
-                assertions.append(StructuredAssertion.from_dict(d))
+        for data in iter_json_objects(text, limit=32):
+            try:
+                assertions.append(StructuredAssertion.from_dict(data))
+            except (KeyError, ValueError, TypeError):
+                # Une entrée mal formée ne doit pas invalider les objets valides
+                # qui suivent dans la même réponse brute.
+                continue
         return cls(parseur_id=parseur_id, assertions=assertions)
 
 

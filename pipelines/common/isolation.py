@@ -84,6 +84,14 @@ def _response_text(response: Any) -> str:
     return str(response)
 
 
+def _estimated_cost_usd(provider: str, input_tokens: Optional[int],
+                        output_tokens: Optional[int]) -> Optional[float]:
+    """Estimation conservatrice D2; DeepSeek compte tout l'input en cache miss."""
+    if provider != "deepseek" or input_tokens is None or output_tokens is None:
+        return None
+    return round((input_tokens * 0.14 + output_tokens * 0.28) / 1_000_000, 8)
+
+
 def _execute_call(
     client: LLMClient,
     config: IsolationConfig,
@@ -117,6 +125,8 @@ def _execute_call(
     if ledger is not None:
         if metadata is None:
             raise ValueError("CallMetadata obligatoire lorsqu'un registre est actif")
+        input_tokens = _usage_value(response, "input_tokens", "prompt_tokens")
+        output_tokens = _usage_value(response, "output_tokens", "completion_tokens")
         ledger.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "pipeline": metadata.pipeline,
@@ -130,10 +140,11 @@ def _execute_call(
             "model": config.model,
             "provider": config.provider,
             "prompt_sha256": sha256(content.encode("utf-8")).hexdigest(),
-            "input_tokens": _usage_value(response, "input_tokens", "prompt_tokens"),
-            "output_tokens": _usage_value(response, "output_tokens", "completion_tokens"),
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
             "wall_time_ms": wall_time_ms,
-            "estimated_cost_usd": None,
+            "estimated_cost_usd": _estimated_cost_usd(
+                config.provider, input_tokens, output_tokens),
         })
     return text
 

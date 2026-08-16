@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Tuple
 
 from pipelines.common.isolation import isolated_call, IsolationConfig, CallMetadata
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
-from pipelines.common.schemas import SourceRef, StructuredAssertion, DialogueAct, EpistemicState
+from pipelines.common.schemas import SourceRef, StructuredAssertion, DialogueAct, EpistemicState, iter_json_objects
 from pipelines.common.agregation import Assertion, ClusteredAssertion, SemanticClusterer
 
 
@@ -54,12 +54,8 @@ def run_p2_instances(
         
         # Parse
         assertions = []
-        for line in raw.strip().split('\n'):
-            line = line.strip()
-            if not line:
-                continue
+        for data in iter_json_objects(raw, limit=32):
             try:
-                data = json.loads(line)
                 src = SourceRef(
                     session_id=data["source_ref"]["session_id"],
                     tour_n=data["source_ref"]["tour_n"],
@@ -74,7 +70,7 @@ def run_p2_instances(
                     reasoning=data.get("reasoning")
                 )
                 assertions.append(assertion)
-            except (json.JSONDecodeError, KeyError, ValueError):
+            except (KeyError, ValueError):
                 continue
         
         all_assertions.append(assertions)
