@@ -54,6 +54,12 @@ Le plan expérimental comporte :
 - **Cycle C** : second modèle/provider, seulement si la règle quantitative
   fixée avant les résultats est déclenchée.
 
+Le contrôle principal suit Huang et al. : une architecture consommant plusieurs
+réponses est comparée à autant de générations indépendantes. Un lot P2 unique
+produit `P2@3`, `P2@4` et `P2@6` ; les comparaisons préenregistrées sont
+P1↔P2@6, P3↔P2@4 et P4↔P2@6. Les comparaisons à budget inégal restent visibles
+mais ne décident pas du verdict.
+
 Deux métriques portent directement la question du dépôt :
 
 - **M09 — Correlated Miss Rate** : part des incidents connus ratés par toutes
@@ -62,7 +68,7 @@ Deux métriques portent directement la question du dépôt :
   A.
 
 La spécification normative complète est
-[`docs/spec/substrat-bench_PROTOCOL_v0_2_2.md`](docs/spec/substrat-bench_PROTOCOL_v0_2_2.md).
+[`docs/spec/substrat-bench_PROTOCOL_v0_3_0.md`](docs/spec/substrat-bench_PROTOCOL_v0_3_0.md).
 
 ## Ce que le banc ne permet pas de conclure
 
@@ -133,6 +139,10 @@ Consulter avant toute expérience réelle :
 Ces travaux motivent la mesure de diversité sans servir de résultat de
 substitution au banc :
 
+- Huang et al., *Large Language Models Cannot Self-Correct Reasoning Yet*
+  (ICLR 2024) — contrôle du débat multi-agents contre la self-consistency à
+  nombre de réponses égal, origine de la Question 0 de v0.3.0 :
+  <https://arxiv.org/abs/2310.01798>
 - Yang et al., *Understanding Agent Scaling in LLM-Based Multi-Agent Systems
   via Diversity* (2026) — comparaison d'ensembles homogènes et hétérogènes :
   <https://arxiv.org/abs/2602.03794>
