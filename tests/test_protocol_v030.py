@@ -14,6 +14,8 @@ from pipelines.pipeline_p3 import run_p3_arbitre
 from metrics.metrics import compute_metrics, match_assertion_to_incident
 from pipelines.pipeline_p1 import run_p1_debate
 from pipelines.pipeline_p2 import aggregate_p2_vote
+from pipelines.common.agnos_observability import AgnosEventWriter
+import run_experiment
 
 
 class RecordingClient:
@@ -137,7 +139,8 @@ def test_mock_full_repetition_writes_exactly_23_ledger_rows(tmp_path):
     output = tmp_path / "results"
     completed = subprocess.run(
         [sys.executable, str(repo / "run_experiment.py"), "--cycles", "1", "--personas", "off",
-         "--provider", "mock", "--corpus", str(corpus), "--output", str(output), "--skip-metrics"],
+         "--provider", "mock", "--corpus", str(corpus), "--output", str(output), "--skip-metrics",
+         "--run-id", "test-run-001"],
         cwd=repo, capture_output=True, text=True,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
@@ -150,3 +153,55 @@ def test_mock_full_repetition_writes_exactly_23_ledger_rows(tmp_path):
     manifest = json.loads(next((output / "cycle_A_0" / "raw_outputs").glob("*prefix_manifest.json")).read_text())
     assert manifest["prefixes"]["P2@3"] == manifest["prefixes"]["P2@6"][:3]
     assert manifest["prefixes"]["P2@4"] == manifest["prefixes"]["P2@6"][:4]
+
+    events = [json.loads(line) for line in (output / "agnos_events.jsonl").read_text().splitlines()]
+    assert len(events) == 12  # runner début/fin + cinq pipelines début/fin
+    required_v2 = {
+        "agent_id", "timestamp", "statut", "tâche", "détail",
+        "cycle_vie", "sante", "resultat",
+    }
+    assert all(required_v2 <= event.keys() for event in events)
+    assert all(event["run_id"] == "test-run-001" for event in events)
+    assert events[0]["agent_id"] == "substrat-runner"
+    assert events[0]["cycle_vie"] == "actif"
+    assert events[-1]["agent_id"] == "substrat-runner"
+    assert events[-1]["statut"] == "succès"
+    assert events[-1]["cycle_vie"] == "termine"
+    assert {event["agent_id"] for event in events[1:-1]} == {
+        "substrat-p0", "substrat-p1", "substrat-p2", "substrat-p3", "substrat-p4",
+    }
+    assert all(event["resultat"] == "indetermine" for event in events)
+
+
+def test_agnos_reports_pipeline_exception_as_technical_error(tmp_path):
+    def failing_pipeline(**kwargs):
+        raise RuntimeError("provider indisponible")
+
+    original = run_experiment.PIPELINE_FUNCS.get("PX")
+    run_experiment.PIPELINE_FUNCS["PX"] = failing_pipeline
+    try:
+        event_path = tmp_path / "agnos.jsonl"
+        results = run_experiment.run_cycle(
+            cycle_num=2,
+            pipelines=["PX"],
+            client=RecordingClient(),
+            model="mock",
+            corpus_text="corpus",
+            output_base=tmp_path,
+            cycle_label="B",
+            agnos_writer=AgnosEventWriter(event_path, "error-run"),
+        )
+    finally:
+        if original is None:
+            del run_experiment.PIPELINE_FUNCS["PX"]
+        else:
+            run_experiment.PIPELINE_FUNCS["PX"] = original
+
+    events = [json.loads(line) for line in event_path.read_text().splitlines()]
+    assert "error" in results[0]
+    assert [event["statut"] for event in events] == ["en_cours", "échec"]
+    assert events[-1]["cycle_vie"] == "termine"
+    assert events[-1]["sante"] == "erreur"
+    assert events[-1]["resultat"] == "indetermine"
+    assert events[-1]["cycle"] == "B"
+    assert events[-1]["repetition"] == 2
