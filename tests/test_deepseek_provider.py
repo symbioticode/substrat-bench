@@ -5,7 +5,8 @@ import pytest
 
 from run_experiment import get_llm_client
 from pipelines.common.isolation import _estimated_cost_usd
-from pipelines.common.schemas import iter_json_objects, ParseurOutput
+from pipelines.common.schemas import iter_json_objects, ParseurOutput, parse_dialogue_act, DialogueAct
+from pipelines.pipeline_p4 import parse_cartographer_output, parse_nucleus_output
 from pipelines.common.prompts import PROMPTS
 from metrics.metrics import load_pipeline_results
 
@@ -78,6 +79,29 @@ def test_parseur_output_skips_invalid_object_and_keeps_following_valid_one():
           '"source_ref":{"session_id":"s","tour_n":1}}'
     parsed = ParseurOutput.from_jsonl(raw, "reader")
     assert [assertion.text for assertion in parsed.assertions] == ["valide"]
+
+
+def test_cartographer_jsonl_zones_become_clusters():
+    raw = '{"zone_ref":{"session_id":"s","tour_range":[1,2]},"assertions":[]}\n' \
+          '{"zone_ref":{"session_id":"s","tour_range":[3,4]},"assertions":[]}'
+    parsed = parse_cartographer_output(raw, "carto_0")
+    assert len(parsed["clusters"]) == 2
+    assert parsed["cartographe_id"] == "carto_0"
+
+
+def test_provider_assert_alias_normalizes_to_contract_enum():
+    assert parse_dialogue_act("Assert") is DialogueAct.INFORM
+
+
+def test_nucleus_thread_range_is_anchored_to_first_exact_turn():
+    raw = '{"text":"synthèse","dialogue_act":"Assert","epistemic_state":"T",' \
+          '"source_ref":{"session_id":"s","tour_range":[3,9]},' \
+          '"confidence":"PROBABLE","coherence_level":"MAJORITY"}'
+    assertions, zones = parse_nucleus_output(raw)
+    assert not zones
+    assert len(assertions) == 1
+    assert assertions[0].source_ref.tour_n == 3
+    assert assertions[0].dialogue_act is DialogueAct.INFORM
 
 
 def test_extraction_prompts_pre_register_uniform_capacity():

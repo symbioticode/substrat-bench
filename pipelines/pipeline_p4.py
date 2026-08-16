@@ -18,7 +18,7 @@ from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
     DialogueAct, EpistemicState, ConfidenceLevel,
-    ParseurOutput, validate_output, iter_json_objects
+    ParseurOutput, validate_output, iter_json_objects, parse_dialogue_act
 )
 from pipelines.common.agregation import (
     SemanticClusterer, Assertion, ClusteredAssertion, DawidSkeneAggregator
@@ -31,6 +31,50 @@ class P4Result:
     cartographe_outputs: List[Dict[str, Any]]
     nucleus_output: List[ArbitratedAssertion]
     non_convergence_zones: List[Dict[str, Any]]
+
+
+def parse_cartographer_output(raw: str, cartographer_id: str) -> Dict[str, Any]:
+    """Normalise objet enveloppe, tableau ou zones JSONL en une carte commune."""
+    objects = list(iter_json_objects(raw, limit=32, flatten_assertions=False))
+    try:
+        decoded = json.loads(raw)
+    except json.JSONDecodeError:
+        decoded = None
+    if isinstance(decoded, dict) and isinstance(decoded.get("clusters"), list):
+        result = decoded
+    elif isinstance(decoded, list):
+        result = {"clusters": [item for item in decoded if isinstance(item, dict)]}
+    else:
+        result = {"clusters": objects}
+    result.setdefault("cross_session_links", [])
+    result.setdefault("non_convergence_zones", [])
+    result["cartographe_id"] = cartographer_id
+    return result
+
+
+def parse_nucleus_output(raw: str) -> tuple[List[ArbitratedAssertion], List[Dict[str, Any]]]:
+    """Parse le niveau fil P4; ancre un tour_range sur son premier tour exact."""
+    assertions: List[ArbitratedAssertion] = []
+    non_convergence: List[Dict[str, Any]] = []
+    for data in iter_json_objects(raw, limit=32):
+        try:
+            if data.get("type") == "non_convergence":
+                non_convergence.append(data)
+                continue
+            src_data = data["source_ref"]
+            tour_n = src_data.get("tour_n")
+            if tour_n is None and src_data.get("tour_range"):
+                tour_n = src_data["tour_range"][0]
+            src = SourceRef(session_id=src_data["session_id"], tour_n=tour_n,
+                            locuteur=src_data.get("locuteur", ""))
+            assertions.append(ArbitratedAssertion(
+                text=data["text"], dialogue_act=parse_dialogue_act(data["dialogue_act"]),
+                epistemic_state=EpistemicState(data["epistemic_state"]), source_ref=src,
+                confidence=ConfidenceLevel(data["confidence"]),
+                coherence_level=data.get("coherence_level"), reasoning=data.get("reasoning")))
+        except (KeyError, ValueError, TypeError, IndexError) as exc:
+            print(f"[P4 Noyau WARNING] {exc}")
+    return assertions, non_convergence
 
 
 def parse_parseur_output(raw_output: str, parseur_id: str) -> ParseurOutput:
@@ -149,16 +193,7 @@ def run_p4_cartographes(
             ledger=ledger,
         )
         
-        # Parse cartographe output
-        try:
-            carto_data = json.loads(raw)
-        except json.JSONDecodeError:
-            # Essayer JSONL
-            carto_data = {"clusters": [], "cross_session_links": [], "non_convergence_zones": []}
-            for data in iter_json_objects(raw, limit=32):
-                carto_data.update(data)
-        
-        carto_data["cartographe_id"] = cartographe_id
+        carto_data = parse_cartographer_output(raw, cartographe_id)
         cartographes.append(carto_data)
         print(f"[P4 Cartographes] {cartographe_id}: {len(carto_data.get('clusters', []))} clusters")
     
@@ -196,38 +231,12 @@ def run_p4_nucleus(
         ledger=ledger,
     )
     
-    # Parse nucleus output (JSONL assertions + non_convergence)
-    assertions = []
-    non_convergence = []
-    
-    for data in iter_json_objects(raw, limit=32):
-        try:
-            if data.get("type") == "non_convergence":
-                non_convergence.append(data)
-                continue
-            
-            src = SourceRef(
-                session_id=data["source_ref"]["session_id"],
-                tour_n=data["source_ref"]["tour_n"],
-                locuteur=data["source_ref"].get("locuteur", "")
-            )
-            
-            assertion = ArbitratedAssertion(
-                text=data["text"],
-                dialogue_act=DialogueAct(data["dialogue_act"]),
-                epistemic_state=EpistemicState(data["epistemic_state"]),
-                source_ref=src,
-                confidence=ConfidenceLevel(data["confidence"]),
-                coherence_level=data.get("coherence_level"),
-                reasoning=data.get("reasoning")
-            )
-            assertions.append(assertion)
-        except (KeyError, ValueError) as e:
-            print(f"[P4 Noyau WARNING] {e}")
+    assertions, non_convergence = parse_nucleus_output(raw)
     
     return {
         "assertions": assertions,
-        "non_convergence_zones": non_convergence
+        "non_convergence_zones": non_convergence,
+        "raw_output": raw,
     }
 
 
@@ -293,6 +302,9 @@ def run_p4(
     (output_dir / f"p4_nucleus_cycle{cycle_num}.jsonl").write_text(
         "\n".join(json.dumps(a.to_dict(), ensure_ascii=False) for a in nucleus_result["assertions"]),
         encoding='utf-8'
+    )
+    (output_dir / f"p4_nucleus_cycle{cycle_num}_raw.txt").write_text(
+        nucleus_result["raw_output"], encoding="utf-8"
     )
     
     # Non-convergence

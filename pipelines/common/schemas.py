@@ -10,7 +10,8 @@ from enum import Enum
 import json
 
 
-def iter_json_objects(text: str, limit: Optional[int] = None):
+def iter_json_objects(text: str, limit: Optional[int] = None,
+                      flatten_assertions: bool = True):
     """Extrait des objets JSON successifs, compacts ou indentés sur plusieurs lignes."""
     decoder = json.JSONDecoder()
     cursor = 0
@@ -25,7 +26,7 @@ def iter_json_objects(text: str, limit: Optional[int] = None):
             cursor = start + 1
             continue
         values = value.get("assertions") if (
-            isinstance(value, dict) and "text" not in value
+            flatten_assertions and isinstance(value, dict) and "text" not in value
             and isinstance(value.get("assertions"), list)
         ) else [value]
         for item in values:
@@ -60,6 +61,12 @@ class DialogueAct(str, Enum):
     PROJECT = "Project"          # Projection non vérifiée (dérive épistémique)
     FLAG_GAP = "FlagGap"         # Lacune silencieuse signalée
     FLAG_AMBIGUITY = "FlagAmbiguity"  # Ambiguïté genuine signalée
+
+
+def parse_dialogue_act(value: str) -> DialogueAct:
+    """Normalise les alias sémantiques provider sans élargir l'enum contractuelle."""
+    aliases = {"Assert": "Inform"}
+    return DialogueAct(aliases.get(value, value))
 
 
 class ConfidenceLevel(str, Enum):
