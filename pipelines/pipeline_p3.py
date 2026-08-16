@@ -14,7 +14,8 @@ from pipelines.common.isolation import isolated_call, IsolationConfig, make_arbi
 from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
-    DialogueAct, EpistemicState, ConfidenceLevel, ParseurOutput, ArbitreOutput
+    DialogueAct, EpistemicState, ConfidenceLevel, ParseurOutput, ArbitreOutput,
+    iter_json_objects,
 )
 from pipelines.common.agregation import SemanticClusterer
 
@@ -108,12 +109,8 @@ def run_p3_arbitre(
     assertions = []
     non_convergence = []
     
-    for line in raw.strip().split('\n'):
-        line = line.strip()
-        if not line:
-            continue
+    for data in iter_json_objects(raw, limit=32):
         try:
-            data = json.loads(line)
             if data.get("type") == "non_convergence":
                 non_convergence.append(data)
                 continue
@@ -134,7 +131,7 @@ def run_p3_arbitre(
                 reasoning=data.get("reasoning")
             )
             assertions.append(assertion)
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
+        except (KeyError, ValueError) as e:
             print(f"[P3 Arbiter WARNING] {e}")
     
     return ArbitreOutput(

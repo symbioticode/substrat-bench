@@ -92,14 +92,23 @@ Rapport : `corpus/d4_calibration_report.json`. Aucun fallback lexical autorisé.
 **Date** : 2026-07-19
 **Contexte** : §1 protocole — contrainte non-négociable : un seul modèle.
 **Options révisées le 2026-08-16** :
-- A. OpenAI `gpt-4.1-mini-2025-04-14` (snapshot figé, adaptateur existant)
-- B. GPT-5.6 Terra (adaptation Responses API requise)
-- C. Gemini 3.6 Flash (nouvel adaptateur requis)
-**Décision : A** — OpenAI `gpt-4.1-mini-2025-04-14`.
-**Justification** : snapshot reproductible et compatible avec l'adaptateur du
-harness. Budget : 230 réponses pour A+B; 115 supplémentaires seulement si C
-est déclenché. `OPENAI_API_KEY` est absente de l'environnement au moment de la
-décision; aucun run payant n'est autorisé avant disponibilité et smoke test.
+- A. OpenAI `gpt-4.1-mini-2025-04-14`
+- B. DeepSeek `deepseek-v4-flash`, API officielle OpenAI-compatible
+- C. DeepSeek `deepseek-v4-pro`, plus coûteux
+**Décision : B** — `deepseek-v4-flash`, mode non-thinking explicitement figé.
+**Justification** : décision d'Andrei d'utiliser la clé DeepSeek existante.
+Le modèle officiel courant offre une fenêtre de 1M tokens. Budget : 230 réponses
+pour A+B; 115 supplémentaires seulement si C est déclenché. Aux tarifs officiels
+du 2026-08-16 (cache miss : 0.14 USD/M tokens entrants; 0.28 USD/M sortants),
+le plafond estimé A+B est inférieur à 1 USD. La clé reste externe au dépôt et
+est injectée depuis `/home/andrei/Projects/61_AGORA/.env` à l'exécution.
+Les smoke tests initiaux ont atteint les plafonds de 2 000 puis 4 000 tokens :
+le prompt sans borne encourageait l'inventaire de chaque fait du corpus. Avant
+le run complet, la capacité est donc préenregistrée à 32 assertions par réponse,
+avec priorité aux six classes d'incident, et un plafond uniforme de 4 000 tokens.
+Les 24 incidents gold tiennent dans cette capacité; la contrainte est identique
+pour toutes les architectures et ne change ni les inférences ni leur appariement.
+Le parseur accepte par ailleurs le JSON compact ou indenté sur plusieurs lignes.
 
 ---
 

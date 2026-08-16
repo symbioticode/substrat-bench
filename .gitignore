@@ -21,6 +21,7 @@ Thumbs.db
 # Results (keep structure, ignore content)
 results/cycle_*/
 !results/cycle_*/.gitkeep
+results/*/
 
 # Logs
 *.log

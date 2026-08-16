@@ -18,7 +18,7 @@ from pipelines.common.prompts import get_prompt, get_prompt_with_persona
 from pipelines.common.schemas import (
     SourceRef, StructuredAssertion, ArbitratedAssertion,
     DialogueAct, EpistemicState, ConfidenceLevel,
-    ParseurOutput, validate_output
+    ParseurOutput, validate_output, iter_json_objects
 )
 from pipelines.common.agregation import (
     SemanticClusterer, Assertion, ClusteredAssertion, DawidSkeneAggregator
@@ -36,12 +36,8 @@ class P4Result:
 def parse_parseur_output(raw_output: str, parseur_id: str) -> ParseurOutput:
     """Parse sortie parseur P4 (identique P3)."""
     assertions = []
-    for line in raw_output.strip().split('\n'):
-        line = line.strip()
-        if not line:
-            continue
+    for data in iter_json_objects(raw_output, limit=32):
         try:
-            data = json.loads(line)
             src = SourceRef(
                 session_id=data["source_ref"]["session_id"],
                 tour_n=data["source_ref"]["tour_n"],
@@ -56,7 +52,7 @@ def parse_parseur_output(raw_output: str, parseur_id: str) -> ParseurOutput:
                 reasoning=data.get("reasoning")
             )
             assertions.append(assertion)
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
+        except (KeyError, ValueError) as e:
             print(f"[P4 Parseur {parseur_id} WARNING] {e}")
     
     return ParseurOutput(parseur_id=parseur_id, assertions=assertions)
@@ -159,12 +155,8 @@ def run_p4_cartographes(
         except json.JSONDecodeError:
             # Essayer JSONL
             carto_data = {"clusters": [], "cross_session_links": [], "non_convergence_zones": []}
-            for line in raw.strip().split('\n'):
-                if line.strip():
-                    try:
-                        carto_data.update(json.loads(line))
-                    except:
-                        pass
+            for data in iter_json_objects(raw, limit=32):
+                carto_data.update(data)
         
         carto_data["cartographe_id"] = cartographe_id
         cartographes.append(carto_data)
@@ -208,12 +200,8 @@ def run_p4_nucleus(
     assertions = []
     non_convergence = []
     
-    for line in raw.strip().split('\n'):
-        line = line.strip()
-        if not line:
-            continue
+    for data in iter_json_objects(raw, limit=32):
         try:
-            data = json.loads(line)
             if data.get("type") == "non_convergence":
                 non_convergence.append(data)
                 continue
@@ -234,7 +222,7 @@ def run_p4_nucleus(
                 reasoning=data.get("reasoning")
             )
             assertions.append(assertion)
-        except (json.JSONDecodeError, KeyError, ValueError) as e:
+        except (KeyError, ValueError) as e:
             print(f"[P4 Noyau WARNING] {e}")
     
     return {

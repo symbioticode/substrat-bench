@@ -1,7 +1,7 @@
 # STATUS.md — État du chantier (source de vérité)
 
 ## Sprint courant : Sprint 0 — corpus et calibration
-## Statut : SPRINT_0_GELÉ — EXPÉRIENCE_RÉELLE_BLOQUÉE
+## Statut : ADAPTATEUR_DEEPSEEK_VALIDÉ — RUN_A+B_DIFFÉRÉ
 ## Version : v0.3.0
 ## Date MAJ : 2026-08-16
 
@@ -9,7 +9,7 @@
 | Décision | Statut | Détail |
 |----------|--------|--------|
 | D1 Corpus source | ✅ DÉCIDÉ | B LocalContext anonymisé; 11 tours réels + 48 injectés |
-| D2 Modèle unique + budget | ⚠️ DÉCIDÉ, CLÉ ABSENTE | `gpt-4.1-mini-2025-04-14`; 230 réponses A+B |
+| D2 Modèle unique + budget | ✅ DÉCIDÉ | `deepseek-v4-flash` non-thinking; 230 réponses A+B; <1 USD estimé |
 | D3 Traçabilité P4 Option B | ✅ ADOPTÉ PROVISOIRE | DEC-006, niveau fil round 2 |
 | D4 Seuil similarité | ✅ FIGÉ | `0.36`; 50 paires; all-MiniLM-L6-v2; F1=0.8364 |
 
@@ -43,9 +43,12 @@
   validation indépendante OpenCode : GEL OUI le 2026-08-16.
 
 ### Prochaine action requise
-**Fournir `OPENAI_API_KEY` pour le smoke test réel borné.** Aucun run LLM
-réel n'est lancé avant ces portes. Le harnais mock ne vaut pas résultat
-expérimental.
+**Relire le rapport des gates DeepSeek, puis planifier A+B complet en tenant
+compte de la durée et des limites de débit.** Aucun résultat des smoke tests ou
+gates ne vaut résultat expérimental; le run A+B commencé a été interrompu et
+explicitement invalidé.
+
+Rapport : `docs/deepseek-d2-gates-20260816.md`.
 
 ### Commandes de vérification
 ```bash
